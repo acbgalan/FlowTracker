@@ -1,0 +1,18 @@
+
+services:
+  flowtracker-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: flowtracker-sql-server
+    restart: unless-stopped
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y 
+      - MSSQL_SA_PASSWORD=P@ssw0rd!
+      - MSSQL_PID=Developer
+    volumes:
+      - flowtracker-db-data:/var/opt/mssql
+
+volumes:
+  flowtracker-db-data:
+    name: flowtracker-db-data
