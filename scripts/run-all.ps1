@@ -1,7 +1,10 @@
 Write-Host "🚀 Starting FlowTracker infrastructure…" -ForegroundColor Cyan
 
-# Database Ups
-docker compose up -d
+# Obtener la ruta raíz del proyecto
+$rootPath = Split-Path -Parent $PSScriptRoot
+
+# Levantar la base de datos usando el compose de la raíz
+docker compose -f "$rootPath\docker-compose.yml" up -d
 
 Write-Host "⏳ Waiting for SQL Server to initialize..." -ForegroundColor Yellow
 Start-Sleep -Seconds 10
