@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="FlowTracker.Data/FlowTracker.Data.csproj" Id="a22cd069-d2c1-4f2a-b620-c6fa7c35adad" />
+    <Project Path="FlowTracker.Server/FlowTracker.Server.csproj" Id="855927a6-e213-426c-ba29-f3938ef67062" />
+    <Project Path="FlowTracker.Shared/FlowTracker.Shared.csproj" Id="9a223208-6c43-4deb-918e-9b9bb0ef30dc" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
