@@ -1,5 +1,6 @@
 using FlowTracker.Data.Contexts;
 using FlowTracker.Data.Repositories;
+using FlowTracker.Server.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -8,6 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ApplicationContext")));
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.LicenseKey = builder.Configuration["AutoMapper:LicenseKey"];
+}, typeof(AutoMapperProfiles));
+
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
