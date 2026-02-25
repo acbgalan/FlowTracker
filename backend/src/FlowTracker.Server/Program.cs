@@ -15,7 +15,12 @@ builder.Services.AddAutoMapper(cfg =>
 }, typeof(AutoMapperProfiles));
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        //This line is the 'magic' that allows receiving 'Expense' in the JSON.
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
