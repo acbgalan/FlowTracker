@@ -8,7 +8,14 @@ namespace FlowTracker.Server.Mapping
     {
         public AutoMapperProfiles()
         {
+            CategoryMappings();
+        }
+
+        private void CategoryMappings()
+        {
             CreateMap<Category, CategoryResponse>();
+            CreateMap<CreateCategoryRequest, Category>();
+            CreateMap<UpdateCategoryRequest, Category>();
         }
     }
 }
