@@ -4,6 +4,7 @@ using FlowTracker.Data.Repositories;
 using FlowTracker.Shared.Dtos.Category;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace FlowTracker.Server.Controllers
 {
@@ -20,7 +21,7 @@ namespace FlowTracker.Server.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetCategory")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CategoryResponse>> GetCategory(int id)
@@ -45,6 +46,82 @@ namespace FlowTracker.Server.Controllers
             var categoriesResponse = _mapper.Map<List<CategoryResponse>>(categories);
 
             return Ok(categoriesResponse);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> CreateCategory([FromBody] CreateCategoryRequest createCategoryRequest)
+        {
+            if (createCategoryRequest == null)
+            {
+                return BadRequest();
+            }
+
+            var category = _mapper.Map<Category>(createCategoryRequest);
+            await _categoryRepository.AddAsync(category);
+            int saveResult = await _categoryRepository.SaveAsync();
+
+            if (!(saveResult > 0))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Valor no esperado al crear nueva categoría");
+            }
+
+            var categoryResponse = _mapper.Map<CategoryResponse>(category);
+
+            return CreatedAtRoute("GetCategory", new { id = category.Id }, categoryResponse);
+        }
+
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryRequest updateCategoryRequest)
+        {
+            if (updateCategoryRequest == null)
+            {
+                return BadRequest();
+            }
+
+            if (updateCategoryRequest.Id != id)
+            {
+                return BadRequest();
+            }
+
+            var category = _mapper.Map<Category>(updateCategoryRequest);
+            await _categoryRepository.UpdateAsync(category);
+            int saveResult = await _categoryRepository.SaveAsync();
+
+            if (!(saveResult > 0))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Valor no esperado al actualizar categoría");
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> DeleteCategory(int id)
+        {
+            var exits = await _categoryRepository.ExitsAsync(id);
+
+            if (!exits)
+            {
+                return NotFound("Categoria no encontrada");
+            }
+
+            await _categoryRepository.DeleteAsync(id);
+            int saveResult = await _categoryRepository.SaveAsync();
+
+            if (!(saveResult > 0))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Valor no esperado al borrar categoría");
+            }
+
+            return NoContent();
         }
 
     }
