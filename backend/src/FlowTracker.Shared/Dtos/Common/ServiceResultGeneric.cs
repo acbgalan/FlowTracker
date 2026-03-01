@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FlowTracker.Shared.Dtos.Common
 {
-    public class ServiceResultGeneric<T> : ServiceResult
+    public class ServiceResult<T> : ServiceResult
     {
         public T? Data { get; set; }
     }
