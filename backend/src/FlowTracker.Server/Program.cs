@@ -1,6 +1,7 @@
 using FlowTracker.Data.Contexts;
 using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Mapping;
+using FlowTracker.Server.Services.Category;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ApplicationContext")));
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.LicenseKey = builder.Configuration["AutoMapper:LicenseKey"];
