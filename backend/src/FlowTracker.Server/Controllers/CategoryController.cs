@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
+using FlowTracker.Server.Services.Category;
 using FlowTracker.Shared.Dtos.Category;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,12 @@ namespace FlowTracker.Server.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
 
-        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper)
+        public CategoryController(ICategoryService categoryService, IMapper mapper)
         {
-            _categoryRepository = categoryRepository;
+            _categoryService = categoryService;
             _mapper = mapper;
         }
 
@@ -26,26 +27,28 @@ namespace FlowTracker.Server.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CategoryResponse>> GetCategory(int id)
         {
-            var category = await _categoryRepository.GetAsync(id);
+            var serviceResult = await _categoryService.GetCategoryAsync(id);
 
-            if (category == null)
+            if (!serviceResult.Success)
             {
-                return NotFound("Category not found");
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
             }
 
-            var categoryResponse = _mapper.Map<CategoryResponse>(category);
-
-            return Ok(categoryResponse);
+            return Ok(serviceResult.Data);
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<CategoryResponse>>> GetAllCategories()
         {
-            var categories = await _categoryRepository.GetAllAsync();
-            var categoriesResponse = _mapper.Map<List<CategoryResponse>>(categories);
+            var serviceResult = await _categoryService.GetCategoriesAsync();
 
-            return Ok(categoriesResponse);
+            if (!serviceResult.Success)
+            {
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
+            }
+
+            return Ok(serviceResult.Data);
         }
 
         [HttpPost]
@@ -54,23 +57,14 @@ namespace FlowTracker.Server.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> CreateCategory([FromBody] CreateCategoryRequest createCategoryRequest)
         {
-            if (createCategoryRequest == null)
+            var serviceResult = await _categoryService.CreateCategoryAsync(createCategoryRequest);
+
+            if (!serviceResult.Success)
             {
-                return BadRequest();
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
             }
 
-            var category = _mapper.Map<Category>(createCategoryRequest);
-            await _categoryRepository.AddAsync(category);
-            int saveResult = await _categoryRepository.SaveAsync();
-
-            if (!(saveResult > 0))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Valor no esperado al crear nueva categoría");
-            }
-
-            var categoryResponse = _mapper.Map<CategoryResponse>(category);
-
-            return CreatedAtRoute("GetCategory", new { id = category.Id }, categoryResponse);
+            return CreatedAtRoute("GetCategory", new { id = serviceResult.Data!.Id }, serviceResult.Data);
         }
 
         [HttpPut("{id:int}")]
@@ -79,23 +73,16 @@ namespace FlowTracker.Server.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryRequest updateCategoryRequest)
         {
-            if (updateCategoryRequest == null)
+            if (id != updateCategoryRequest.Id)
             {
-                return BadRequest();
+                return BadRequest("TId mismatch");
             }
 
-            if (updateCategoryRequest.Id != id)
-            {
-                return BadRequest();
-            }
+            var serviceResult = await _categoryService.UpdateCategoryAsync(updateCategoryRequest);
 
-            var category = _mapper.Map<Category>(updateCategoryRequest);
-            await _categoryRepository.UpdateAsync(category);
-            int saveResult = await _categoryRepository.SaveAsync();
-
-            if (!(saveResult > 0))
+            if (!serviceResult.Success)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Valor no esperado al actualizar categoría");
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
             }
 
             return NoContent();
@@ -106,23 +93,16 @@ namespace FlowTracker.Server.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteCategory(int id)
         {
-            var exits = await _categoryRepository.ExitsAsync(id);
+            var serviceResult = await _categoryService.DeleteCategoryAsync(id);
 
-            if (!exits)
+            if (!serviceResult.Success)
             {
-                return NotFound("Categoria no encontrada");
-            }
-
-            await _categoryRepository.DeleteAsync(id);
-            int saveResult = await _categoryRepository.SaveAsync();
-
-            if (!(saveResult > 0))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Valor no esperado al borrar categoría");
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
             }
 
             return NoContent();
         }
+
 
     }
 }

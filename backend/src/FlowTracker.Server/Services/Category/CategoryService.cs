@@ -106,7 +106,6 @@ namespace FlowTracker.Server.Services.Category
                 await _categoryRepository.AddAsync(category);
                 int saveResult = await _categoryRepository.SaveAsync();
 
-
                 if (saveResult > 0)
                 {
                     var categoryResponse = _mapper.Map<CategoryResponse>(category);
