@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowTracker.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20260222005932_Initial")]
+    [Migration("20260225004156_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -32,6 +32,11 @@ namespace FlowTracker.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Icon")
                         .IsRequired()

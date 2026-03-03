@@ -29,6 +29,10 @@ namespace FlowTracker.Data.Configurations
                 .HasMaxLength(100)
                 .HasDefaultValue("default-icon");
 
+            builder.Property(c => c.Description)
+                .IsRequired()
+                .HasMaxLength(250);
+
             builder.HasIndex(c => new { c.Name, c.Type }).IsUnique();
         }
     }
