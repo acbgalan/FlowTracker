@@ -27,35 +27,16 @@ namespace FlowTracker.Server.Services.Category
 
                 if (category != null)
                 {
-                    return new ServiceResult<CategoryResponse>
-                    {
-                        Success = true,
-                        Message = "Category retrieved successfully",
-                        StatusCode = StatusCodes.Status200OK,
-                        Data = categoryResponse
-                    };
+                    return SuccessResult<CategoryResponse>("Category retrieved successfully", StatusCodes.Status200OK, categoryResponse);
                 }
                 else
                 {
-                    return new ServiceResult<CategoryResponse>
-                    {
-                        Success = false,
-                        Message = "Category not found",
-                        StatusCode = StatusCodes.Status404NotFound,
-                        Data = null
-                    };
+                    return FailureResult<CategoryResponse>("Category not found", StatusCodes.Status404NotFound);
                 }
-
             }
             catch (Exception ex)
             {
-                return new ServiceResult<CategoryResponse>
-                {
-                    Success = false,
-                    Message = $"Unexpected error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError,
-                    Data = null
-                };
+                return HandleGeneralException<CategoryResponse>(ex);
             }
         }
 
@@ -66,24 +47,11 @@ namespace FlowTracker.Server.Services.Category
                 var categories = await _categoryRepository.GetAllAsync();
                 var categoriesResponse = _mapper.Map<List<CategoryResponse>>(categories);
 
-                return new ServiceResult<List<CategoryResponse>>
-                {
-                    Success = true,
-                    Message = "Categories retrieved successfully",
-                    StatusCode = StatusCodes.Status200OK,
-                    Data = categoriesResponse
-                };
-
+                return SuccessResult<List<CategoryResponse>>("Categories retrieved successfully", StatusCodes.Status200OK, categoriesResponse);
             }
             catch (Exception ex)
             {
-                return new ServiceResult<List<CategoryResponse>>
-                {
-                    Success = false,
-                    Message = $"Unexpected error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError,
-                    Data = null
-                };
+                return HandleGeneralException<List<CategoryResponse>>(ex);
             }
         }
 
@@ -93,13 +61,7 @@ namespace FlowTracker.Server.Services.Category
             {
                 if (createCategoryRequest == null)
                 {
-                    return new ServiceResult<CategoryResponse>
-                    {
-                        Success = false,
-                        Message = "The request object is null",
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        Data = null
-                    };
+                    return FailureResult<CategoryResponse>("The request object is null", StatusCodes.Status400BadRequest);
                 }
 
                 var category = _mapper.Map<Data.Entities.Category>(createCategoryRequest);
@@ -109,46 +71,20 @@ namespace FlowTracker.Server.Services.Category
                 if (saveResult > 0)
                 {
                     var categoryResponse = _mapper.Map<CategoryResponse>(category);
-                    return new ServiceResult<CategoryResponse>
-                    {
-                        Success = true,
-                        Message = "Category created successfully",
-                        StatusCode = StatusCodes.Status201Created,
-                        Data = categoryResponse
-                    };
+                    return SuccessResult<CategoryResponse>("Category created successfully", StatusCodes.Status201Created, categoryResponse);
                 }
                 else
                 {
-                    return new ServiceResult<CategoryResponse>
-                    {
-                        Success = false,
-                        Message = "Unexpected value when creating a category",
-                        StatusCode = StatusCodes.Status500InternalServerError,
-                        Data = null
-                    };
+                    return FailureResult<CategoryResponse>("Unexpected value when creating a category", StatusCodes.Status500InternalServerError);
                 }
-
             }
             catch (DbUpdateException ex)
             {
-                return new ServiceResult<CategoryResponse>
-                {
-                    Success = false,
-                    Message = $"Database error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError,
-                    Data = null
-                };
+                return HandleGeneralException<CategoryResponse>(ex);
             }
             catch (Exception ex)
             {
-                return new ServiceResult<CategoryResponse>
-                {
-                    Success = false,
-                    Message = $"Unexpected error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError,
-                    Data = null
-                };
-
+                return HandleGeneralException<CategoryResponse>(ex);
             }
         }
 
@@ -158,12 +94,7 @@ namespace FlowTracker.Server.Services.Category
             {
                 if (updateCategoryRequest == null)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "The request object is null",
-                        StatusCode = StatusCodes.Status400BadRequest
-                    };
+                    return FailureResult("The request object is null", StatusCodes.Status400BadRequest);
                 }
 
                 var category = _mapper.Map<Data.Entities.Category>(updateCategoryRequest);
@@ -172,40 +103,20 @@ namespace FlowTracker.Server.Services.Category
 
                 if (saveResult > 0)
                 {
-                    return new ServiceResult
-                    {
-                        Success = true,
-                        Message = "Category updated successfully",
-                        StatusCode = StatusCodes.Status204NoContent
-                    };
+                    return SuccessResult("Category updated successfully", StatusCodes.Status204NoContent);
                 }
                 else
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Unexpected value when updating a category",
-                        StatusCode = StatusCodes.Status500InternalServerError
-                    };
+                    return FailureResult("Unexpected value when updating a category", StatusCodes.Status500InternalServerError);
                 }
             }
             catch (DbUpdateException ex)
             {
-                return new ServiceResult
-                {
-                    Success = false,
-                    Message = $"Database error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError
-                };
+                return HandleDbUpdateException(ex);
             }
             catch (Exception ex)
             {
-                return new ServiceResult
-                {
-                    Success = false,
-                    Message = $"Unexpected error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError
-                };
+                return HandleGeneralException(ex);
             }
         }
 
@@ -217,12 +128,7 @@ namespace FlowTracker.Server.Services.Category
 
                 if (!exits)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Category not found",
-                        StatusCode = StatusCodes.Status404NotFound
-                    };
+                    return FailureResult("Category not found", StatusCodes.Status404NotFound);
                 }
 
                 await _categoryRepository.DeleteAsync(id);
@@ -230,44 +136,88 @@ namespace FlowTracker.Server.Services.Category
 
                 if (saveResult > 0)
                 {
-                    return new ServiceResult
-                    {
-                        Success = true,
-                        Message = "Category deleted successfully",
-                        StatusCode = StatusCodes.Status204NoContent
-                    };
+                    return SuccessResult("Category deleted successfully", StatusCodes.Status204NoContent);
                 }
                 else
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Unexpected value when deleting category",
-                        StatusCode = StatusCodes.Status500InternalServerError
-                    };
+                    return FailureResult("Unexpected value when deleting category", StatusCodes.Status500InternalServerError);
                 }
             }
             catch (DbUpdateException ex)
             {
-                return new ServiceResult
-                {
-                    Success = false,
-                    Message = $"Database error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError
-                };
+                return HandleDbUpdateException(ex);
             }
             catch (Exception ex)
             {
-                return new ServiceResult
-                {
-                    Success = false,
-                    Message = $"Unexpected error: {ex.Message}",
-                    StatusCode = StatusCodes.Status500InternalServerError
-                };
+                return HandleGeneralException(ex);
             }
         }
 
-        //TODO: SuccessResult, FailureResult
+        #region Helper methods
+
+        public ServiceResult SuccessResult(string message, int statusCode)
+        {
+            return new ServiceResult
+            {
+                Success = true,
+                Message = message,
+                StatusCode = statusCode
+            };
+        }
+
+        public ServiceResult<T> SuccessResult<T>(string message, int statusCode, T? data = default)
+        {
+            return new ServiceResult<T>
+            {
+                Success = true,
+                Message = message,
+                StatusCode = statusCode,
+                Data = data
+            };
+        }
+
+        public ServiceResult FailureResult(string message, int statusCode)
+        {
+            return new ServiceResult
+            {
+                Success = false,
+                Message = message,
+                StatusCode = statusCode
+            };
+        }
+
+        public ServiceResult<T> FailureResult<T>(string message, int statusCode, T? data = default)
+        {
+            return new ServiceResult<T>
+            {
+                Success = false,
+                Message = message,
+                StatusCode = statusCode,
+                Data = data
+            };
+        }
+
+        public ServiceResult HandleDbUpdateException(DbUpdateException ex)
+        {
+            return FailureResult($"Database error: {ex.Message}", StatusCodes.Status500InternalServerError);
+        }
+
+        public ServiceResult<T> HandleDbUpdateException<T>(DbUpdateException ex)
+        {
+            return FailureResult<T>($"Database error: {ex.Message}", StatusCodes.Status500InternalServerError);
+        }
+
+        public ServiceResult HandleGeneralException(Exception ex)
+        {
+            return FailureResult($"Unexpected error: {ex.Message}", StatusCodes.Status500InternalServerError);
+        }
+
+        public ServiceResult<T> HandleGeneralException<T>(Exception ex)
+        {
+            return FailureResult<T>($"Unexpected error: {ex.Message}", StatusCodes.Status500InternalServerError);
+        }
+
+        #endregion        
 
     }
 }
