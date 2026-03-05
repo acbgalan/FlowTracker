@@ -4,6 +4,8 @@ using FlowTracker.Server.Mapping;
 using FlowTracker.Server.Services.Category;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using FluentValidation;
+using FlowTracker.Shared.Validators.Category;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,7 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.LicenseKey = builder.Configuration["AutoMapper:LicenseKey"];
 }, typeof(AutoMapperProfiles));
-
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
