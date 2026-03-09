@@ -64,6 +64,12 @@ namespace FlowTracker.Server.Services.Category
                     return FailureResult<CategoryResponse>("The request object is null", StatusCodes.Status400BadRequest);
                 }
 
+                bool exitsNameAndType = await _categoryRepository.ExitsByNameAndTypeAsync(createCategoryRequest.Name, createCategoryRequest.Type);
+                if (exitsNameAndType)
+                {
+                    return FailureResult<CategoryResponse>("A category with that name and type already exists.", StatusCodes.Status409Conflict);
+                }
+
                 var category = _mapper.Map<Data.Entities.Category>(createCategoryRequest);
                 await _categoryRepository.AddAsync(category);
                 int saveResult = await _categoryRepository.SaveAsync();

@@ -1,5 +1,6 @@
 ﻿using FlowTracker.Data.Contexts;
 using FlowTracker.Data.Entities;
+using FlowTracker.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -67,5 +68,10 @@ namespace FlowTracker.Data.Repositories
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> ExitsByNameAndTypeAsync(string name, TransactionType type)
+        {
+            bool exits = await _context.Categories.AnyAsync(x => x.Name.ToLower() == name.ToLower() && x.Type == type);
+            return exits;
+        }
     }
 }
