@@ -3,6 +3,7 @@ using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Services.Category;
 using FlowTracker.Shared.Dtos.Category;
+using FlowTracker.Shared.Validators.Category;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +18,18 @@ namespace FlowTracker.Server.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
         private readonly IValidator<CreateCategoryRequest> _createCategoryRequestValidator;
+        private readonly IValidator<UpdateCategoryRequest> _updateCategoryRequestValidator;
 
-        public CategoryController(ICategoryService categoryService, IMapper mapper, IValidator<CreateCategoryRequest> createCategoryRequestValidator)
+        public CategoryController(
+            ICategoryService categoryService,
+            IMapper mapper,
+            IValidator<CreateCategoryRequest> createCategoryRequestValidator,
+            IValidator<UpdateCategoryRequest> updateCategoryRequestValidator)
         {
             _categoryService = categoryService;
             _mapper = mapper;
             _createCategoryRequestValidator = createCategoryRequestValidator;
+            _updateCategoryRequestValidator = updateCategoryRequestValidator;
         }
 
         [HttpGet("{id:int}", Name = "GetCategory")]
@@ -85,11 +92,20 @@ namespace FlowTracker.Server.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryRequest updateCategoryRequest)
         {
+            // 1. Fast validations
             if (id != updateCategoryRequest.Id)
             {
-                return BadRequest("TId mismatch");
+                return BadRequest("Id mismatch");
             }
 
+            var validationResult = _updateCategoryRequestValidator.Validate(updateCategoryRequest);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.ToDictionary());
+            }
+
+            // 2. Service call (business logic)
             var serviceResult = await _categoryService.UpdateCategoryAsync(updateCategoryRequest);
 
             if (!serviceResult.Success)
