@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using FluentValidation;
 using FlowTracker.Shared.Validators.Category;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,29 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.LicenseKey = builder.Configuration["AutoMapper:LicenseKey"];
 }, typeof(AutoMapperProfiles));
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>();
+
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddEntityFrameworkStores<ApplicationContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<AspNetUserManager<IdentityUser>>();
+builder.Services.AddScoped<SignInManager<IdentityUser>>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.MapInboundClaims = false;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["jwt_key"]!)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
