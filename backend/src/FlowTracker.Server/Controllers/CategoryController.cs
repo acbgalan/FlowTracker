@@ -5,6 +5,7 @@ using FlowTracker.Server.Services.Category;
 using FlowTracker.Shared.Dtos.Category;
 using FlowTracker.Shared.Validators.Category;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query;
@@ -13,6 +14,7 @@ namespace FlowTracker.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
@@ -49,6 +51,7 @@ namespace FlowTracker.Server.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [AllowAnonymous]
         public async Task<ActionResult<List<CategoryResponse>>> GetAllCategories()
         {
             var serviceResult = await _categoryService.GetCategoriesAsync();
