@@ -26,7 +26,7 @@ builder.Services.AddIdentityCore<IdentityUser>()
     .AddEntityFrameworkStores<ApplicationContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<AspNetUserManager<IdentityUser>>();
+builder.Services.AddScoped<UserManager<IdentityUser>>();
 builder.Services.AddScoped<SignInManager<IdentityUser>>();
 builder.Services.AddHttpContextAccessor();
 
