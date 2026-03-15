@@ -51,7 +51,6 @@ namespace FlowTracker.Server.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [AllowAnonymous]
         public async Task<ActionResult<List<CategoryResponse>>> GetAllCategories()
         {
             var serviceResult = await _categoryService.GetCategoriesAsync();
