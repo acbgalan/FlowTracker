@@ -17,11 +17,13 @@ namespace FlowTracker.Server.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public UserController(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public UserController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
             _configuration = configuration;
         }
 
@@ -52,6 +54,32 @@ namespace FlowTracker.Server.Controllers
                 return ValidationProblem();
             }
         }
+
+        [HttpPost("Login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<UserAuthenticationResponse>> Login(UserCredentialsRequest userCredentialsRequest)
+        {
+            var user = await _userManager.FindByEmailAsync(userCredentialsRequest.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login");
+                return ValidationProblem();
+            }
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, userCredentialsRequest.Password, false);
+
+            if (result.Succeeded)
+            {
+                return await BuildToken(userCredentialsRequest);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login");
+                return ValidationProblem();
+            }
+        }
+
 
         private async Task<UserAuthenticationResponse> BuildToken(UserCredentialsRequest userCredentials)
         {
