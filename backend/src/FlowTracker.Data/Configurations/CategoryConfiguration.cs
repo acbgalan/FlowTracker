@@ -33,7 +33,7 @@ namespace FlowTracker.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(250);
 
-            builder.HasIndex(c => new { c.Name, c.Type }).IsUnique();
+            builder.HasIndex(c => new { c.Name, c.Type, c.UserId }).IsUnique();
         }
     }
 }
