@@ -14,6 +14,6 @@ namespace FlowTracker.Data.Entities
         public decimal CurrentAmount { get; set; }
         public DateOnly Deadline { get; set; }
 
-        public IdentityUser Identity { get; set; } = null!;
+        public User User { get; set; } = null!;
     }
 }

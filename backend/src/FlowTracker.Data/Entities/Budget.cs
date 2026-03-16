@@ -15,6 +15,6 @@ namespace FlowTracker.Data.Entities
         public int Year { get; set; }
 
         public Category Category { get; set; } = null!;
-        public IdentityUser IdentityUser { get; set; } = null!;
+        public User User { get; set; } = null!;
     }
 }
