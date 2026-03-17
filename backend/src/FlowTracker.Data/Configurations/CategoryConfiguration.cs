@@ -38,7 +38,13 @@ namespace FlowTracker.Data.Configurations
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(c => new { c.Name, c.Type, c.UserId }).IsUnique();
+            builder.HasIndex(c => new { c.Name, c.Type })
+                .IsUnique()
+                .HasFilter("[UserId] IS NULL");
+
+            builder.HasIndex(c => new { c.Name, c.Type, c.UserId })
+                .IsUnique()
+                .HasFilter("[UserId] IS NOT NULL");
         }
     }
 }
