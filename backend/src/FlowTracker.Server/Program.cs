@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using FlowTracker.Data.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ builder.Services.AddAutoMapper(cfg =>
 }, typeof(AutoMapperProfiles));
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>();
 
-builder.Services.AddIdentityCore<IdentityUser>()
+builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<ApplicationContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
