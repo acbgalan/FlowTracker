@@ -4,9 +4,9 @@ using System.Text;
 
 namespace FlowTracker.Shared.Enums
 {
-    public enum TransactionType
+    public enum MovementType
     {
-        Income = 1,
-        Expense = 2
+        Deposit = 1,
+        Withdrawal = 2
     }
 }

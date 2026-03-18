@@ -33,7 +33,18 @@ namespace FlowTracker.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(250);
 
-            builder.HasIndex(c => new { c.Name, c.Type }).IsUnique();
+            builder.HasOne(c => c.User)
+                .WithMany(u => u.Categories)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(c => new { c.Name, c.Type })
+                .IsUnique()
+                .HasFilter("[UserId] IS NULL");
+
+            builder.HasIndex(c => new { c.Name, c.Type, c.UserId })
+                .IsUnique()
+                .HasFilter("[UserId] IS NOT NULL");
         }
     }
 }

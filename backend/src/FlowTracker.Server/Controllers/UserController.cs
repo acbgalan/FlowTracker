@@ -1,4 +1,5 @@
 ﻿using Azure;
+using FlowTracker.Data.Entities;
 using FlowTracker.Shared.Dtos.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,11 +17,11 @@ namespace FlowTracker.Server.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public UserController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration)
+        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -31,8 +32,10 @@ namespace FlowTracker.Server.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<UserAuthenticationResponse>> Register(UserCredentialsRequest userCredentialsRequest)
         {
-            var user = new IdentityUser()
+            var user = new User()
             {
+                FirstName = userCredentialsRequest.FirstName,
+                LastName = userCredentialsRequest.LastName,
                 UserName = userCredentialsRequest.Email,
                 Email = userCredentialsRequest.Email
             };
