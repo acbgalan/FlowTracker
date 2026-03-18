@@ -7,9 +7,9 @@ using System.Text;
 
 namespace FlowTracker.Shared.Validators.User
 {
-    public class UserCredentialsRequestValidator : AbstractValidator<UserCredentialsRequest>
+    public class UserRegisterRequestValidator : AbstractValidator<UserRegisterRequest>
     {
-        public UserCredentialsRequestValidator()
+        public UserRegisterRequestValidator()
         {
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("The email is required and cannot be empty.")
@@ -20,7 +20,6 @@ namespace FlowTracker.Shared.Validators.User
             RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("The password is required and cannot be empty.")
                 .MinimumLength(10).WithMessage("The password must be at least 10 characters long.");
-
         }
     }
 }
