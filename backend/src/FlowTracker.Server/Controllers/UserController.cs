@@ -30,21 +30,21 @@ namespace FlowTracker.Server.Controllers
 
         [HttpPost("Register")]
         [AllowAnonymous]
-        public async Task<ActionResult<UserAuthenticationResponse>> Register(UserCredentialsRequest userCredentialsRequest)
+        public async Task<ActionResult<UserAuthenticationResponse>> Register(UserRegisterRequest userRegisterRequest)
         {
             var user = new User()
             {
-                FirstName = userCredentialsRequest.FirstName,
-                LastName = userCredentialsRequest.LastName,
-                UserName = userCredentialsRequest.Email,
-                Email = userCredentialsRequest.Email
+                FirstName = userRegisterRequest.FirstName,
+                LastName = userRegisterRequest.LastName,
+                UserName = userRegisterRequest.Email,
+                Email = userRegisterRequest.Email
             };
 
-            var identityResult = await _userManager.CreateAsync(user, userCredentialsRequest.Password);
+            var identityResult = await _userManager.CreateAsync(user, userRegisterRequest.Password);
 
             if (identityResult.Succeeded)
             {
-                var authenticationResponse = await BuildToken(userCredentialsRequest);
+                var authenticationResponse = await BuildToken(userRegisterRequest.Email);
                 return authenticationResponse;
             }
             else
@@ -60,9 +60,9 @@ namespace FlowTracker.Server.Controllers
 
         [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<ActionResult<UserAuthenticationResponse>> Login(UserCredentialsRequest userCredentialsRequest)
+        public async Task<ActionResult<UserAuthenticationResponse>> Login(UserLoginRequest userLoginRequest)
         {
-            var user = await _userManager.FindByEmailAsync(userCredentialsRequest.Email);
+            var user = await _userManager.FindByEmailAsync(userLoginRequest.Email);
 
             if (user == null)
             {
@@ -70,11 +70,11 @@ namespace FlowTracker.Server.Controllers
                 return ValidationProblem();
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, userCredentialsRequest.Password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, userLoginRequest.Password, false);
 
             if (result.Succeeded)
             {
-                return await BuildToken(userCredentialsRequest);
+                return await BuildToken(userLoginRequest.Email);
             }
             else
             {
@@ -84,16 +84,16 @@ namespace FlowTracker.Server.Controllers
         }
 
 
-        private async Task<UserAuthenticationResponse> BuildToken(UserCredentialsRequest userCredentials)
+        private async Task<UserAuthenticationResponse> BuildToken(string email)
         {
             // Create a claim. Information about the user.
             var claims = new List<Claim>
             {
-                new Claim("email", userCredentials.Email)
+                new Claim("email",email)
             };
 
             //We look up the user and retrieve their claims from the database.
-            var user = await _userManager.FindByEmailAsync(userCredentials.Email);
+            var user = await _userManager.FindByEmailAsync(email);
             var claimsDb = await _userManager.GetClaimsAsync(user!);
             claims.AddRange(claimsDb);
 
