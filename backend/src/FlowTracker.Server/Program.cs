@@ -33,7 +33,6 @@ builder.Services.AddIdentityCore<User>()
 
 builder.Services.AddHttpContextAccessor();
 
-
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -48,6 +47,12 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("IsAdmin", policy => policy.RequireClaim("Administrator"));
+});
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
