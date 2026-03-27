@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using FlowTracker.Server.Services.Common;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using AppUser = FlowTracker.Data.Entities.User;
 
 namespace FlowTracker.Server.Services.User
 {
-    public class UserService : IUserService
+    public class UserService : BaseService, IUserService
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IHttpContextAccessor _httpContext;
