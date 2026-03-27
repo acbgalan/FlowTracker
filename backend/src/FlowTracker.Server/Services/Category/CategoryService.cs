@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
 using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
+using FlowTracker.Server.Services.Common;
 using FlowTracker.Shared.Dtos.Category;
 using FlowTracker.Shared.Dtos.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlowTracker.Server.Services.Category
 {
-    public class CategoryService : ICategoryService
+    public class CategoryService : BaseService, ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
