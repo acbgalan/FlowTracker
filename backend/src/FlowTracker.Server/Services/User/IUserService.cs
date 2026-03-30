@@ -1,4 +1,6 @@
-﻿using AppUser = FlowTracker.Data.Entities.User;
+﻿using FlowTracker.Shared.Dtos.Common;
+using FlowTracker.Shared.Dtos.User;
+using AppUser = FlowTracker.Data.Entities.User;
 
 namespace FlowTracker.Server.Services.User
 {
@@ -8,5 +10,8 @@ namespace FlowTracker.Server.Services.User
         bool IsAdministrator();
         Task<bool> SetAdministrator(string email);
         Task<bool> RemoveAdministrator(string email);
+
+        Task<ServiceResult<UserAuthenticationResponse>> LoginAsync(UserLoginRequest userLoginRequest);
+        Task<UserAuthenticationResponse> BuildToken(string email);
     }
 }
