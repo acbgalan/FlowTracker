@@ -47,11 +47,7 @@ namespace FlowTracker.Server.Services.User
             return await _userManager.FindByEmailAsync(email);
         }
 
-        public bool IsAdministrator()
-        {
-            var administratorClaim = _httpContext.HttpContext!.User.Claims.Where(x => x.Type == "Administrator").FirstOrDefault();
-            return administratorClaim != null ? true : false;
-        }
+
 
         public async Task<bool> SetAdministrator(string email)
         {
@@ -115,7 +111,7 @@ namespace FlowTracker.Server.Services.User
         }
 
 
-        public async Task<UserAuthenticationResponse> BuildToken(string email)
+        private async Task<UserAuthenticationResponse> BuildToken(string email)
         {
             // Create a claim. Information about the user.
             var claims = new List<Claim>
@@ -140,6 +136,12 @@ namespace FlowTracker.Server.Services.User
                 Token = token,
                 Expiration = expiration
             };
+        }
+
+        public bool IsAdministrator()
+        {
+            var administratorClaim = _httpContext.HttpContext!.User.Claims.Where(x => x.Type == "Administrator").FirstOrDefault();
+            return administratorClaim != null ? true : false;
         }
 
     }
