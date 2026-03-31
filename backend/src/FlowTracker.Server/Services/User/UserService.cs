@@ -1,4 +1,5 @@
-﻿using FlowTracker.Server.Services.Common;
+﻿using AutoMapper;
+using FlowTracker.Server.Services.Common;
 using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Dtos.User;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -17,17 +18,20 @@ namespace FlowTracker.Server.Services.User
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContext;
+        private readonly IMapper _mapper;
 
         public UserService(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             IConfiguration configuration,
-            IHttpContextAccessor httpContext)
+            IHttpContextAccessor httpContext,
+            IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _httpContext = httpContext;
+            _mapper = mapper;
         }
 
         public async Task<AppUser?> GetUserAsync()
@@ -95,6 +99,21 @@ namespace FlowTracker.Server.Services.User
             return SuccessResult<UserAuthenticationResponse>("Login successful", StatusCodes.Status200OK, userAuthenticationResponse);
         }
 
+        public async Task<ServiceResult<UserAuthenticationResponse>> RegisterAsync(UserRegisterRequest userRegisterRequest)
+        {
+            var user = _mapper.Map<AppUser>(userRegisterRequest);
+            var identityResult = await _userManager.CreateAsync(user, userRegisterRequest.Password);
+
+            if (!identityResult.Succeeded)
+            {
+                var errorMessage = string.Join("; ", identityResult.Errors.Select(x => x.Description));
+                return FailureResult<UserAuthenticationResponse>(errorMessage, StatusCodes.Status400BadRequest);
+            }
+
+            var userAuthenticationResponse = await BuildToken(userRegisterRequest.Email);
+            return SuccessResult<UserAuthenticationResponse>("", StatusCodes.Status200OK, userAuthenticationResponse);
+        }
+
 
         public async Task<UserAuthenticationResponse> BuildToken(string email)
         {
@@ -122,7 +141,6 @@ namespace FlowTracker.Server.Services.User
                 Expiration = expiration
             };
         }
-
 
     }
 }

@@ -12,6 +12,9 @@ namespace FlowTracker.Server.Services.User
         Task<bool> RemoveAdministrator(string email);
 
         Task<ServiceResult<UserAuthenticationResponse>> LoginAsync(UserLoginRequest userLoginRequest);
+
+        Task<ServiceResult<UserAuthenticationResponse>> RegisterAsync(UserRegisterRequest userRegisterRequest);
+
         Task<UserAuthenticationResponse> BuildToken(string email);
     }
 }

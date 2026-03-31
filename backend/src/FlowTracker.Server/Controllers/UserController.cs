@@ -2,6 +2,7 @@
 using FlowTracker.Data.Entities;
 using FlowTracker.Server.Services.User;
 using FlowTracker.Shared.Dtos.User;
+using FlowTracker.Shared.Validators.User;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,49 +25,50 @@ namespace FlowTracker.Server.Controllers
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
         private readonly IValidator<UserLoginRequest> _userLoginRequestValidator;
+        private readonly IValidator<UserRegisterRequest> _userRegisterRequestValidator;
 
         public UserController(
                     UserManager<User> userManager,
                     SignInManager<User> signInManager,
                     IUserService userService,
                     IConfiguration configuration,
-                    IValidator<UserLoginRequest> userLoginRequestValidator)
+                    IValidator<UserLoginRequest> userLoginRequestValidator,
+                    IValidator<UserRegisterRequest> userRegisterRequestValidator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userService = userService;
             _configuration = configuration;
             _userLoginRequestValidator = userLoginRequestValidator;
+            _userRegisterRequestValidator = userRegisterRequestValidator;
         }
 
         [HttpPost("Register")]
         [AllowAnonymous]
         public async Task<ActionResult<UserAuthenticationResponse>> Register(UserRegisterRequest userRegisterRequest)
         {
-            var user = new User()
+            // 1. Fast validations
+            if (userRegisterRequest == null)
             {
-                FirstName = userRegisterRequest.FirstName,
-                LastName = userRegisterRequest.LastName,
-                UserName = userRegisterRequest.Email,
-                Email = userRegisterRequest.Email
-            };
-
-            var identityResult = await _userManager.CreateAsync(user, userRegisterRequest.Password);
-
-            if (identityResult.Succeeded)
-            {
-                var authenticationResponse = await BuildToken(userRegisterRequest.Email);
-                return authenticationResponse;
+                return BadRequest();
             }
-            else
-            {
-                foreach (var error in identityResult.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
 
-                return ValidationProblem();
+            var validationResult = _userRegisterRequestValidator.Validate(userRegisterRequest);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.ToDictionary());
             }
+
+            // 2. Call service (business logic)
+            var serviceResult = await _userService.RegisterAsync(userRegisterRequest);
+
+            if (!serviceResult.Success)
+            {
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
+            }
+
+            return Ok(serviceResult.Data);
         }
 
         [HttpPost("Login")]

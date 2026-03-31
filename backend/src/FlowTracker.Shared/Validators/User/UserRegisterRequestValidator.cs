@@ -11,6 +11,13 @@ namespace FlowTracker.Shared.Validators.User
     {
         public UserRegisterRequestValidator()
         {
+            RuleFor(x => x.FirstName)
+                .NotEmpty().WithMessage("The first name is required and cannot be empty.")
+                .MaximumLength(50).WithMessage("The first name cannot exceed 50 characters.");
+
+            RuleFor(x => x.LastName)
+                .MaximumLength(100).WithMessage("The last name cannot exceed 100 characters.");
+
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("The email is required and cannot be empty.")
                 .MaximumLength(256).WithMessage("The email cannot exceed 256 characters.")
@@ -19,7 +26,7 @@ namespace FlowTracker.Shared.Validators.User
 
             RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("The password is required and cannot be empty.")
-                .MinimumLength(10).WithMessage("The password must be at least 10 characters long.");
+                .MinimumLength(8).WithMessage("The password must be at least 8 characters long.");
         }
     }
 }
