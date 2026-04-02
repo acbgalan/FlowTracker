@@ -34,45 +34,19 @@ namespace FlowTracker.Server.Services.User
             _mapper = mapper;
         }
 
-        public async Task<AppUser?> GetUserAsync()
+        public async Task<ServiceResult<UserAuthenticationResponse>> RegisterAsync(UserRegisterRequest userRegisterRequest)
         {
-            var emailClaim = _httpContext.HttpContext!.User.Claims.Where(x => x.Type == "email").FirstOrDefault();
+            var user = _mapper.Map<AppUser>(userRegisterRequest);
+            var identityResult = await _userManager.CreateAsync(user, userRegisterRequest.Password);
 
-            if (emailClaim == null)
+            if (!identityResult.Succeeded)
             {
-                return null;
+                var errorMessage = string.Join("; ", identityResult.Errors.Select(x => x.Description));
+                return FailureResult<UserAuthenticationResponse>(errorMessage, StatusCodes.Status400BadRequest);
             }
 
-            var email = emailClaim.Value;
-            return await _userManager.FindByEmailAsync(email);
-        }
-
-
-
-        public async Task<bool> SetAdministrator(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-
-            if (user == null)
-            {
-                return false;
-            }
-
-            await _userManager.AddClaimAsync(user, new Claim("Administrator", "true"));
-            return true;
-        }
-
-        public async Task<bool> RemoveAdministrator(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-
-            if (user == null)
-            {
-                return false;
-            }
-
-            await _userManager.RemoveClaimAsync(user, new Claim("Administrator", "true"));
-            return true;
+            var userAuthenticationResponse = await BuildToken(userRegisterRequest.Email);
+            return SuccessResult<UserAuthenticationResponse>("", StatusCodes.Status200OK, userAuthenticationResponse);
         }
 
         public async Task<ServiceResult<UserAuthenticationResponse>> LoginAsync(UserLoginRequest userLoginRequest)
@@ -95,19 +69,44 @@ namespace FlowTracker.Server.Services.User
             return SuccessResult<UserAuthenticationResponse>("Login successful", StatusCodes.Status200OK, userAuthenticationResponse);
         }
 
-        public async Task<ServiceResult<UserAuthenticationResponse>> RegisterAsync(UserRegisterRequest userRegisterRequest)
-        {
-            var user = _mapper.Map<AppUser>(userRegisterRequest);
-            var identityResult = await _userManager.CreateAsync(user, userRegisterRequest.Password);
 
-            if (!identityResult.Succeeded)
+        private async Task<AppUser?> GetUserAsync()
+        {
+            var emailClaim = _httpContext.HttpContext!.User.Claims.Where(x => x.Type == "email").FirstOrDefault();
+
+            if (emailClaim == null)
             {
-                var errorMessage = string.Join("; ", identityResult.Errors.Select(x => x.Description));
-                return FailureResult<UserAuthenticationResponse>(errorMessage, StatusCodes.Status400BadRequest);
+                return null;
             }
 
-            var userAuthenticationResponse = await BuildToken(userRegisterRequest.Email);
-            return SuccessResult<UserAuthenticationResponse>("", StatusCodes.Status200OK, userAuthenticationResponse);
+            var email = emailClaim.Value;
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        private async Task<bool> SetAdministrator(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            await _userManager.AddClaimAsync(user, new Claim("Administrator", "true"));
+            return true;
+        }
+
+        private async Task<bool> RemoveAdministrator(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            await _userManager.RemoveClaimAsync(user, new Claim("Administrator", "true"));
+            return true;
         }
 
 
@@ -138,7 +137,7 @@ namespace FlowTracker.Server.Services.User
             };
         }
 
-        public bool IsAdministrator()
+        private bool IsAdministrator()
         {
             var administratorClaim = _httpContext.HttpContext!.User.Claims.Where(x => x.Type == "Administrator").FirstOrDefault();
             return administratorClaim != null ? true : false;

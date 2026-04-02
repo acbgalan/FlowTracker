@@ -6,12 +6,7 @@ namespace FlowTracker.Server.Services.User
 {
     public interface IUserService
     {
-        Task<AppUser?> GetUserAsync();
-        Task<bool> SetAdministrator(string email);
-        Task<bool> RemoveAdministrator(string email);
-
-        Task<ServiceResult<UserAuthenticationResponse>> LoginAsync(UserLoginRequest userLoginRequest);
-
         Task<ServiceResult<UserAuthenticationResponse>> RegisterAsync(UserRegisterRequest userRegisterRequest);
+        Task<ServiceResult<UserAuthenticationResponse>> LoginAsync(UserLoginRequest userLoginRequest);
     }
 }
