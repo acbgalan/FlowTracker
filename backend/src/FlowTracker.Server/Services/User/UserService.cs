@@ -69,20 +69,6 @@ namespace FlowTracker.Server.Services.User
             return SuccessResult<UserAuthenticationResponse>("Login successful", StatusCodes.Status200OK, userAuthenticationResponse);
         }
 
-
-        private async Task<AppUser?> GetUserAsync()
-        {
-            var emailClaim = _httpContext.HttpContext!.User.Claims.Where(x => x.Type == "email").FirstOrDefault();
-
-            if (emailClaim == null)
-            {
-                return null;
-            }
-
-            var email = emailClaim.Value;
-            return await _userManager.FindByEmailAsync(email);
-        }
-
         private async Task<bool> SetAdministrator(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
