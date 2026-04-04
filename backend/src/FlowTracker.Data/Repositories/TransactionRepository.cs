@@ -51,7 +51,7 @@ namespace FlowTracker.Data.Repositories
             }
         }
 
-        public async Task DeleteASync(Transaction entity)
+        public async Task DeleteAsync(Transaction entity)
         {
             await Task.Run(() =>
             {

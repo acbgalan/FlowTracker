@@ -72,9 +72,9 @@ namespace FlowTracker.Server.Services.Category
                 {
                     return FailureResult<CategoryResponse>("A category with that name and type already exists.", StatusCodes.Status409Conflict);
                 }
-                
+
                 var category = _mapper.Map<Data.Entities.Category>(createCategoryRequest);
-                var userId = await _currentUserService.GetUserId();
+                var userId = await _currentUserService.GetUserIdAsync();
                 category.UserId = userId;
                 await _categoryRepository.AddAsync(category);
                 int saveResult = await _categoryRepository.SaveAsync();
@@ -108,7 +108,15 @@ namespace FlowTracker.Server.Services.Category
                     return FailureResult("The request object is null", StatusCodes.Status400BadRequest);
                 }
 
-                var category = _mapper.Map<Data.Entities.Category>(updateCategoryRequest);
+                var userId = await _currentUserService.GetUserIdAsync();
+                var category = await _categoryRepository.GetAsync(updateCategoryRequest.Id, userId);
+
+                if (category == null)
+                {
+                    return FailureResult("User is not allowed to update the category", StatusCodes.Status403Forbidden);
+                }
+
+                _mapper.Map(updateCategoryRequest, category);
                 await _categoryRepository.UpdateAsync(category);
                 int saveResult = await _categoryRepository.SaveAsync();
 
@@ -135,14 +143,22 @@ namespace FlowTracker.Server.Services.Category
         {
             try
             {
-                var exits = await _categoryRepository.ExitsAsync(id);
+                var category = await _categoryRepository.GetAsync(id);
 
-                if (!exits)
+                if (category == null)
                 {
                     return FailureResult("Category not found", StatusCodes.Status404NotFound);
                 }
 
-                await _categoryRepository.DeleteAsync(id);
+                var userId = await _currentUserService.GetUserIdAsync();
+
+                if (category.UserId != userId)
+                {
+                    return FailureResult("User is not allowed to delete the category", StatusCodes.Status403Forbidden);
+                }
+
+                await _categoryRepository.DeleteAsync(category);
+
                 int saveResult = await _categoryRepository.SaveAsync();
 
                 if (saveResult > 0)

@@ -50,7 +50,7 @@ namespace FlowTracker.Data.Repositories
             }
         }
 
-        public async Task DeleteASync(Category entity)
+        public async Task DeleteAsync(Category entity)
         {
             await Task.Run(() =>
             {
@@ -72,6 +72,11 @@ namespace FlowTracker.Data.Repositories
         {
             bool exits = await _context.Categories.AnyAsync(x => x.Name.ToLower() == name.ToLower() && x.Type == type);
             return exits;
+        }
+
+        public async Task<Category?> GetAsync(int id, string userId)
+        {
+            return await _context.Categories.Where(x => x.Id == id && x.UserId == userId).FirstOrDefaultAsync();
         }
     }
 }
