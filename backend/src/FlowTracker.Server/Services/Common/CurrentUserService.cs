@@ -26,7 +26,7 @@ namespace FlowTracker.Server.Services.Common
             return await _userManager.FindByEmailAsync(claimEmail.Value);
         }
 
-        public async Task<string?> GetUserId()
+        public async Task<string?> GetUserIdAsync()
         {
             var user = await this.GetUserAsync();
 

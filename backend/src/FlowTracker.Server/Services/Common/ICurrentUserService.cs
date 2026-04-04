@@ -5,7 +5,7 @@ namespace FlowTracker.Server.Services.Common
     public interface ICurrentUserService
     {
         Task<AppUser?> GetUserAsync();
-        Task<string?> GetUserId();
+        Task<string?> GetUserIdAsync();
         string? GetEmail();
     }
 }
