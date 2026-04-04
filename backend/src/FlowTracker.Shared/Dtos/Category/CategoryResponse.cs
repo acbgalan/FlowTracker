@@ -12,5 +12,6 @@ namespace FlowTracker.Shared.Dtos.Category
         public string Type { get; set; } = string.Empty;
         public string Icon { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string? UserId { get; set; }
     }
 }
