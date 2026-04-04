@@ -11,11 +11,13 @@ namespace FlowTracker.Server.Services.Category
     public class CategoryService : BaseService, ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
+        public CategoryService(ICategoryRepository categoryRepository, ICurrentUserService currentUserService, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
+            _currentUserService = currentUserService;
             _mapper = mapper;
         }
 
@@ -70,8 +72,10 @@ namespace FlowTracker.Server.Services.Category
                 {
                     return FailureResult<CategoryResponse>("A category with that name and type already exists.", StatusCodes.Status409Conflict);
                 }
-
+                
                 var category = _mapper.Map<Data.Entities.Category>(createCategoryRequest);
+                var userId = await _currentUserService.GetUserId();
+                category.UserId = userId;
                 await _categoryRepository.AddAsync(category);
                 int saveResult = await _categoryRepository.SaveAsync();
 
