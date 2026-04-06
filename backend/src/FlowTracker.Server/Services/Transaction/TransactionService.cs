@@ -30,23 +30,34 @@ namespace FlowTracker.Server.Services.Transaction
                 var transaction = await _transactionRepository.GetAsync(id);
                 var transactionResponse = transaction != null ? _mapper.Map<TransactionResponse>(transaction) : null;
 
-                if (transaction != null)
+                if (transaction == null)
                 {
                     return FailureResult<TransactionResponse>("Transaction not found", StatusCodes.Status404NotFound);
                 }
 
-                return FailureResult<TransactionResponse>("Transaction retrieved successfully", StatusCodes.Status200OK);
+                return SuccessResult<TransactionResponse>("Transaction retrieved successfully", StatusCodes.Status200OK, transactionResponse);
             }
             catch (Exception ex)
             {
                 return HandleGeneralException<TransactionResponse>(ex);
             }
-
         }
 
-        public Task<ServiceResult<TransactionResponse>> GetTransactionsAsync()
+        public async Task<ServiceResult<List<TransactionResponse>>> GetTransactionsAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var transactions = await _transactionRepository.GetAllAsync();
+                var transactionsResponse = _mapper.Map<List<TransactionResponse>>(transactions);
+
+                return SuccessResult<List<TransactionResponse>>("Transactions retrieved successfully", StatusCodes.Status200OK, transactionsResponse);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException<List<TransactionResponse>>(ex);
+            }
         }
+
+
     }
 }
