@@ -34,7 +34,7 @@ namespace FlowTracker.Server.Mapping
                 .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.Category.Type))
                 .ForMember(d => d.Icon, o => o.MapFrom(s => s.Category.Icon))
-                .ForMember(d =>> d.CategoryDescription, o => o.MapFrom(s => s.Category.Description));
+                .ForMember(d => d.CategoryDescription, o => o.MapFrom(s => s.Category.Description));
         }
 
     }
