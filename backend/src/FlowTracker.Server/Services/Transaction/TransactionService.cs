@@ -9,18 +9,14 @@ namespace FlowTracker.Server.Services.Transaction
     public class TransactionService : BaseService, ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository;
+        private readonly CurrentUserService _currentUserService;
         private readonly IMapper _mapper;
 
-        public TransactionService(ITransactionRepository transactionRepository, IMapper mapper)
+        public TransactionService(ITransactionRepository transactionRepository, CurrentUserService currentUserService, IMapper mapper)
         {
             _transactionRepository = transactionRepository;
+            _currentUserService = currentUserService;
             _mapper = mapper;
-        }
-
-
-        public Task<ServiceResult> CreateTransactionAsync()
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<ServiceResult<TransactionResponse>> GetTransaction(int id)
@@ -58,6 +54,26 @@ namespace FlowTracker.Server.Services.Transaction
             }
         }
 
+        public async Task<ServiceResult<List<TransactionResponse>>> GetTransactionsCurrentUserAsync()
+        {
+            try
+            {
+                var userId = await _currentUserService.GetUserIdAsync();
+                var transactions = _transactionRepository.GetAllAsync(userId!);
+                var transactionsResponse = _mapper.Map<List<TransactionResponse>>(transactions);
+
+                return SuccessResult<List<TransactionResponse>>("Transactions retrieved successfully", StatusCodes.Status200OK, transactionsResponse);
+            }
+            catch
+            {
+                return HandleGeneralException<List<TransactionResponse>>(ex);
+            }
+        }
+
+        public Task<ServiceResult> CreateTransactionAsync()
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }
