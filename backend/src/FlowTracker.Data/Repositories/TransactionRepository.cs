@@ -1,5 +1,6 @@
 ﻿using FlowTracker.Data.Contexts;
 using FlowTracker.Data.Entities;
+using FlowTracker.Shared.Dtos.Transaction;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,13 +24,17 @@ namespace FlowTracker.Data.Repositories
 
         public async Task<Transaction?> GetAsync(int id)
         {
-            return await _context.Transactions.FindAsync(id);
-
+            return await _context.Transactions.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Transaction>> GetAllAsync()
         {
-            return await _context.Transactions.ToListAsync();
+            return await _context.Transactions.Include(x => x.Category).ToListAsync();
+        }
+
+        public async Task<List<Transaction>> GetAllAsync(string userId)
+        {
+            return await _context.Transactions.Include(x => x.Category).Where(x => x.UserId == userId).ToListAsync();
         }
 
         public async Task UpdateAsync(Transaction entity)
@@ -39,7 +44,6 @@ namespace FlowTracker.Data.Repositories
                 _context.Transactions.Update(entity);
             });
         }
-
 
         public async Task DeleteAsync(int id)
         {
@@ -68,5 +72,6 @@ namespace FlowTracker.Data.Repositories
         {
             return await _context.SaveChangesAsync();
         }
+
     }
 }
