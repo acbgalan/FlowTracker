@@ -1,21 +1,29 @@
 ﻿using AutoMapper;
+using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Services.Common;
 using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Dtos.Transaction;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace FlowTracker.Server.Services.Transaction
 {
     public class TransactionService : BaseService, ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly CurrentUserService _currentUserService;
         private readonly IMapper _mapper;
 
-        public TransactionService(ITransactionRepository transactionRepository, CurrentUserService currentUserService, IMapper mapper)
+        public TransactionService(
+            ITransactionRepository transactionRepository,
+            ICategoryRepository categoryRepository,
+            CurrentUserService currentUserService,
+            IMapper mapper)
         {
             _transactionRepository = transactionRepository;
+            _categoryRepository = categoryRepository;
             _currentUserService = currentUserService;
             _mapper = mapper;
         }
@@ -73,9 +81,46 @@ namespace FlowTracker.Server.Services.Transaction
             }
         }
 
-        public Task<ServiceResult> CreateTransactionAsync()
+        public async Task<ServiceResult<TransactionResponse>> CreateTransactionAsync(CreateTransactionRequest createTransactionRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //Verify category
+                var category = await _categoryRepository.GetAsync(createTransactionRequest.CategoryId);
+
+                if (category == null)
+                {
+                    return FailureResult<TransactionResponse>("Category not found", StatusCodes.Status400BadRequest);
+                }
+
+                var userId = await _currentUserService.GetUserIdAsync();
+
+                if (category.UserId != null && category.UserId != userId)
+                {
+                    return FailureResult<TransactionResponse>("Category not found", StatusCodes.Status400BadRequest);
+                }
+
+                var transaction = _mapper.Map<FlowTracker.Data.Entities.Transaction>(createTransactionRequest);
+                transaction.UserId = userId!;
+                await _transactionRepository.AddAsync(transaction);
+                int saveResult = await _transactionRepository.SaveAsync();
+
+                if (!(saveResult > 0))
+                {
+                    return FailureResult<TransactionResponse>("Unexpected value when creating a transaction", StatusCodes.Status500InternalServerError);
+                }
+
+                var transactionResponse = _mapper.Map<TransactionResponse>(transaction);
+                return SuccessResult<TransactionResponse>("Transaction created successfully", StatusCodes.Status201Created, transactionResponse);
+            }
+            catch (DbUpdateException ex)
+            {
+                return HandleDbUpdateException<TransactionResponse>(ex);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException<TransactionResponse>(ex);
+            }
         }
 
         public Task<ServiceResult> UpdateTransactionAsync()
