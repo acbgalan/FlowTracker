@@ -20,7 +20,7 @@ namespace FlowTracker.Server.Services.Transaction
             _mapper = mapper;
         }
 
-        public async Task<ServiceResult<TransactionResponse>> GetTransaction(int id)
+        public async Task<ServiceResult<TransactionResponse>> GetTransactionAsync(int id)
         {
             try
             {
