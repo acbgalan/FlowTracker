@@ -37,6 +37,7 @@ namespace FlowTracker.Server.Mapping
                 .ForMember(d => d.CategoryDescription, o => o.MapFrom(s => s.Category.Description));
 
             CreateMap<CreateTransactionRequest, Transaction>();
+            CreateMap<UpdateTransactionRequest, Transaction>();
         }
 
     }
