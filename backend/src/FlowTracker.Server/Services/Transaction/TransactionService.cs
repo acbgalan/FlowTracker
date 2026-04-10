@@ -90,14 +90,14 @@ namespace FlowTracker.Server.Services.Transaction
 
                 if (category == null)
                 {
-                    return FailureResult<TransactionResponse>("Category not found", StatusCodes.Status400BadRequest);
+                    return FailureResult<TransactionResponse>("Invalid category selection", StatusCodes.Status400BadRequest);
                 }
 
                 var userId = await _currentUserService.GetUserIdAsync();
 
                 if (category.UserId != null && category.UserId != userId)
                 {
-                    return FailureResult<TransactionResponse>("Category not found", StatusCodes.Status400BadRequest);
+                    return FailureResult<TransactionResponse>("Transaction not found", StatusCodes.Status400BadRequest);
                 }
 
                 var transaction = _mapper.Map<FlowTracker.Data.Entities.Transaction>(createTransactionRequest);
@@ -123,9 +123,42 @@ namespace FlowTracker.Server.Services.Transaction
             }
         }
 
-        public Task<ServiceResult> UpdateTransactionAsync()
+        public async Task<ServiceResult> UpdateTransactionAsync(UpdateTransactionRequest updateTransactionRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var userId = await _currentUserService.GetUserIdAsync();
+                var IsValidCategory = await _categoryRepository.IsValidCategoryForUserAsync(updateTransactionRequest.CategoryId, userId!);
+
+                if (!IsValidCategory)
+                {
+                    return FailureResult("Invalid category selection", StatusCodes.Status400BadRequest);
+                }
+
+                var transaction = await _transactionRepository.GetAsync(updateTransactionRequest.Id);
+
+                if (transaction == null)
+                {
+                    return FailureResult("Transaction not found", StatusCodes.Status404NotFound);
+                }
+
+                if (transaction.UserId != userId)
+                {
+                    return FailureResult("User is not allowed to update the transaction", StatusCodes.Status403Forbidden);
+                }
+
+                _mapper.Map(updateTransactionRequest, transaction);
+                await _transactionRepository.SaveAsync();
+                return SuccessResult("Transaction updated successfully", StatusCodes.Status204NoContent);
+            }
+            catch (DbUpdateException ex)
+            {
+                return HandleDbUpdateException(ex);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException(ex);
+            }
         }
 
         public async Task<ServiceResult> DeleteTransactionAsync(int id)
