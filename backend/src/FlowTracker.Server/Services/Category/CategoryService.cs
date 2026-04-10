@@ -109,7 +109,7 @@ namespace FlowTracker.Server.Services.Category
                 }
 
                 var userId = await _currentUserService.GetUserIdAsync();
-                var category = await _categoryRepository.GetAsync(updateCategoryRequest.Id, userId);
+                var category = await _categoryRepository.GetAsync(updateCategoryRequest.Id, userId!);
 
                 if (category == null)
                 {
@@ -180,5 +180,15 @@ namespace FlowTracker.Server.Services.Category
             }
         }
 
+        public async Task<bool> IsCategoryValidForUserAsync(int id)
+        {
+            var userId = await _currentUserService.GetUserIdAsync();
+            return await _categoryRepository.IsCategoryValidForUserAsync(id, userId!);
+        }
+
+        public async Task<bool> IsCategoryValidForUserAsync(int id, string userId)
+        {
+            return await _categoryRepository.IsCategoryValidForUserAsync(id, userId);
+        }
     }
 }
