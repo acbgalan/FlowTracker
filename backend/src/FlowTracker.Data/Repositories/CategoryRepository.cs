@@ -32,6 +32,11 @@ namespace FlowTracker.Data.Repositories
             return await _context.Categories.ToListAsync();
         }
 
+        public async Task<List<Category>> GetAllAsync(string userId)
+        {
+            return await _context.Categories.Where(x => x.UserId == null || x.UserId == userId).ToListAsync();
+        }
+
         public async Task UpdateAsync(Category entity)
         {
             await Task.Run(() =>
@@ -83,5 +88,7 @@ namespace FlowTracker.Data.Repositories
         {
             return await _context.Categories.AnyAsync(x => x.Id == id && (x.UserId == null || x.UserId == userId));
         }
+
+
     }
 }
