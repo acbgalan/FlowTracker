@@ -55,7 +55,8 @@ namespace FlowTracker.Server.Services.Transaction
         {
             try
             {
-                var transactions = await _transactionRepository.GetAllAsync();
+                var userId = await GetUserIdCachedAsync();
+                var transactions = await _transactionRepository.GetAllAsync(userId!);
                 var transactionsResponse = _mapper.Map<List<TransactionResponse>>(transactions);
 
                 return SuccessResult<List<TransactionResponse>>("Transactions retrieved successfully", StatusCodes.Status200OK, transactionsResponse);
@@ -70,7 +71,7 @@ namespace FlowTracker.Server.Services.Transaction
         {
             try
             {
-                var userId = await _currentUserService.GetUserIdAsync();
+                var userId = await GetUserIdCachedAsync();
                 var isValidUserCategory = await _categoryService.IsCategoryValidForUserAsync(createTransactionRequest.CategoryId, userId!);
 
                 if (!isValidUserCategory)
@@ -83,6 +84,7 @@ namespace FlowTracker.Server.Services.Transaction
                 await _transactionRepository.AddAsync(transaction);
                 await _transactionRepository.SaveAsync();
                 var transactionResponse = _mapper.Map<TransactionResponse>(transaction);
+
                 return SuccessResult<TransactionResponse>("Transaction created successfully", StatusCodes.Status201Created, transactionResponse);
             }
             catch (DbUpdateException ex)
@@ -99,7 +101,7 @@ namespace FlowTracker.Server.Services.Transaction
         {
             try
             {
-                var userId = await _currentUserService.GetUserIdAsync();
+                var userId = await GetUserIdCachedAsync();
                 var isValidUserCategory = await _categoryService.IsCategoryValidForUserAsync(updateTransactionRequest.CategoryId, userId!);
 
                 if (!isValidUserCategory)
@@ -107,16 +109,11 @@ namespace FlowTracker.Server.Services.Transaction
                     return FailureResult("Invalid category selection", StatusCodes.Status400BadRequest);
                 }
 
-                var transaction = await _transactionRepository.GetAsync(updateTransactionRequest.Id);
+                var transaction = await _transactionRepository.GetAsync(updateTransactionRequest.Id, userId!);
 
                 if (transaction == null)
                 {
                     return FailureResult("Transaction not found", StatusCodes.Status404NotFound);
-                }
-
-                if (transaction.UserId != userId)
-                {
-                    return FailureResult("User is not allowed to update the transaction", StatusCodes.Status403Forbidden);
                 }
 
                 _mapper.Map(updateTransactionRequest, transaction);
@@ -137,18 +134,12 @@ namespace FlowTracker.Server.Services.Transaction
         {
             try
             {
-                var transaction = await _transactionRepository.GetAsync(id);
+                var userId = await GetUserIdCachedAsync();
+                var transaction = await _transactionRepository.GetAsync(id, userId!);
 
                 if (transaction == null)
                 {
                     return FailureResult("Transaction not found", StatusCodes.Status404NotFound);
-                }
-
-                var userId = await _currentUserService.GetUserIdAsync();
-
-                if (transaction.UserId != userId)
-                {
-                    return FailureResult("User is not allowed to delete the transaction", StatusCodes.Status403Forbidden);
                 }
 
                 await _transactionRepository.DeleteAsync(transaction);
