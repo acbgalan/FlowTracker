@@ -8,7 +8,6 @@ namespace FlowTracker.Server.Services.Transaction
     {
         Task<ServiceResult<TransactionResponse>> GetTransactionAsync(int id);
         Task<ServiceResult<List<TransactionResponse>>> GetTransactionsAsync();
-        Task<ServiceResult<List<TransactionResponse>>> GetTransactionsCurrentUserAsync();
         Task<ServiceResult<TransactionResponse>> CreateTransactionAsync(CreateTransactionRequest createTransactionRequest);
         Task<ServiceResult> UpdateTransactionAsync(UpdateTransactionRequest updateTransactionRequest);
         Task<ServiceResult> DeleteTransactionAsync(int id);

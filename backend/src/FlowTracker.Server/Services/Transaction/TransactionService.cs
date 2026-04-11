@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
+using FlowTracker.Server.Services.Category;
 using FlowTracker.Server.Services.Common;
 using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Dtos.Transaction;
@@ -12,19 +13,20 @@ namespace FlowTracker.Server.Services.Transaction
     public class TransactionService : BaseService, ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly CurrentUserService _currentUserService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
+        private string? _userId;
 
         public TransactionService(
             ITransactionRepository transactionRepository,
-            ICategoryRepository categoryRepository,
-            CurrentUserService currentUserService,
+            ICurrentUserService currentUserService,
+            ICategoryService categoryService,
             IMapper mapper)
         {
             _transactionRepository = transactionRepository;
-            _categoryRepository = categoryRepository;
             _currentUserService = currentUserService;
+            _categoryService = categoryService;
             _mapper = mapper;
         }
 
@@ -32,14 +34,15 @@ namespace FlowTracker.Server.Services.Transaction
         {
             try
             {
-                var transaction = await _transactionRepository.GetAsync(id);
-                var transactionResponse = transaction != null ? _mapper.Map<TransactionResponse>(transaction) : null;
+                var userId = await GetUserIdCachedAsync();
+                var transaction = await _transactionRepository.GetAsync(id, userId!);
 
                 if (transaction == null)
                 {
                     return FailureResult<TransactionResponse>("Transaction not found", StatusCodes.Status404NotFound);
                 }
 
+                var transactionResponse = _mapper.Map<TransactionResponse>(transaction);
                 return SuccessResult<TransactionResponse>("Transaction retrieved successfully", StatusCodes.Status200OK, transactionResponse);
             }
             catch (Exception ex)
@@ -63,53 +66,22 @@ namespace FlowTracker.Server.Services.Transaction
             }
         }
 
-        public async Task<ServiceResult<List<TransactionResponse>>> GetTransactionsCurrentUserAsync()
-        {
-            try
-            {
-                var userId = await _currentUserService.GetUserIdAsync();
-                var transactions = _transactionRepository.GetAllAsync(userId!);
-                var transactionsResponse = _mapper.Map<List<TransactionResponse>>(transactions);
-
-                return SuccessResult<List<TransactionResponse>>("Transactions retrieved successfully", StatusCodes.Status200OK, transactionsResponse);
-            }
-            catch (Exception ex)
-            {
-                {
-                    return HandleGeneralException<List<TransactionResponse>>(ex);
-                }
-            }
-        }
-
         public async Task<ServiceResult<TransactionResponse>> CreateTransactionAsync(CreateTransactionRequest createTransactionRequest)
         {
             try
             {
-                //Verify category
-                var category = await _categoryRepository.GetAsync(createTransactionRequest.CategoryId);
+                var userId = await _currentUserService.GetUserIdAsync();
+                var isValidUserCategory = await _categoryService.IsCategoryValidForUserAsync(createTransactionRequest.CategoryId, userId!);
 
-                if (category == null)
+                if (!isValidUserCategory)
                 {
                     return FailureResult<TransactionResponse>("Invalid category selection", StatusCodes.Status400BadRequest);
-                }
-
-                var userId = await _currentUserService.GetUserIdAsync();
-
-                if (category.UserId != null && category.UserId != userId)
-                {
-                    return FailureResult<TransactionResponse>("Transaction not found", StatusCodes.Status400BadRequest);
                 }
 
                 var transaction = _mapper.Map<FlowTracker.Data.Entities.Transaction>(createTransactionRequest);
                 transaction.UserId = userId!;
                 await _transactionRepository.AddAsync(transaction);
-                int saveResult = await _transactionRepository.SaveAsync();
-
-                if (!(saveResult > 0))
-                {
-                    return FailureResult<TransactionResponse>("Unexpected value when creating a transaction", StatusCodes.Status500InternalServerError);
-                }
-
+                await _transactionRepository.SaveAsync();
                 var transactionResponse = _mapper.Map<TransactionResponse>(transaction);
                 return SuccessResult<TransactionResponse>("Transaction created successfully", StatusCodes.Status201Created, transactionResponse);
             }
@@ -128,9 +100,9 @@ namespace FlowTracker.Server.Services.Transaction
             try
             {
                 var userId = await _currentUserService.GetUserIdAsync();
-                var IsValidCategory = await _categoryRepository.IsValidCategoryForUserAsync(updateTransactionRequest.CategoryId, userId!);
+                var isValidUserCategory = await _categoryService.IsCategoryValidForUserAsync(updateTransactionRequest.CategoryId, userId!);
 
-                if (!IsValidCategory)
+                if (!isValidUserCategory)
                 {
                     return FailureResult("Invalid category selection", StatusCodes.Status400BadRequest);
                 }
@@ -180,12 +152,7 @@ namespace FlowTracker.Server.Services.Transaction
                 }
 
                 await _transactionRepository.DeleteAsync(transaction);
-                int saveResult = await _transactionRepository.SaveAsync();
-
-                if (saveResult > 0)
-                {
-                    return FailureResult("Unexpected value when deleting transaction", StatusCodes.Status500InternalServerError);
-                }
+                await _transactionRepository.SaveAsync();
 
                 return SuccessResult("Transaction deleted successfully", StatusCodes.Status200OK);
             }
@@ -197,6 +164,16 @@ namespace FlowTracker.Server.Services.Transaction
             {
                 return HandleGeneralException(ex);
             }
+        }
+
+        private async Task<string?> GetUserIdCachedAsync()
+        {
+            if (_userId == null)
+            {
+                _userId = await _currentUserService.GetUserIdAsync();
+            }
+
+            return _userId;
         }
 
     }
