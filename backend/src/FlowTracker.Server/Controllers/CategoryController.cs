@@ -18,18 +18,15 @@ namespace FlowTracker.Server.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
-        private readonly IMapper _mapper;
         private readonly IValidator<CreateCategoryRequest> _createCategoryRequestValidator;
         private readonly IValidator<UpdateCategoryRequest> _updateCategoryRequestValidator;
 
         public CategoryController(
             ICategoryService categoryService,
-            IMapper mapper,
             IValidator<CreateCategoryRequest> createCategoryRequestValidator,
             IValidator<UpdateCategoryRequest> updateCategoryRequestValidator)
         {
             _categoryService = categoryService;
-            _mapper = mapper;
             _createCategoryRequestValidator = createCategoryRequestValidator;
             _updateCategoryRequestValidator = updateCategoryRequestValidator;
         }
@@ -51,6 +48,7 @@ namespace FlowTracker.Server.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<List<CategoryResponse>>> GetAllCategories()
         {
             var serviceResult = await _categoryService.GetCategoriesAsync();
