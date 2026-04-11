@@ -8,6 +8,7 @@ namespace FlowTracker.Data.Repositories
 {
     public interface ITransactionRepository : IRepositoryAsync<Transaction>
     {
+        Task<Transaction?> GetAsync(int id, string userId);
         Task<List<Transaction>> GetAllAsync(string userId);
     }
 }

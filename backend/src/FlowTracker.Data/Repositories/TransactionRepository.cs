@@ -27,6 +27,11 @@ namespace FlowTracker.Data.Repositories
             return await _context.Transactions.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<Transaction> GetAsync(int id, string userId)
+        {
+            return await _context.Transactions.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        }
+
         public async Task<List<Transaction>> GetAllAsync()
         {
             return await _context.Transactions.Include(x => x.Category).ToListAsync();
