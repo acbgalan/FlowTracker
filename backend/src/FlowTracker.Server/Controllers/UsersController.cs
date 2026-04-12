@@ -18,7 +18,7 @@ namespace FlowTracker.Server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
@@ -27,7 +27,7 @@ namespace FlowTracker.Server.Controllers
         private readonly IValidator<UserLoginRequest> _userLoginRequestValidator;
         private readonly IValidator<UserRegisterRequest> _userRegisterRequestValidator;
 
-        public UserController(
+        public UsersController(
                     UserManager<User> userManager,
                     SignInManager<User> signInManager,
                     IUserService userService,

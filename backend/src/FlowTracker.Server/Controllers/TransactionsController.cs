@@ -10,13 +10,13 @@ namespace FlowTracker.Server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class TransactionController : ControllerBase
+    public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
         private readonly IValidator<CreateTransactionRequest> _createTransactionRequestValidator;
         private readonly IValidator<UpdateTransactionRequest> _updateTransactionRequestValidator;
 
-        public TransactionController(
+        public TransactionsController(
             ITransactionService transactionService,
             IValidator<CreateTransactionRequest> CreateTransactionRequestValidator,
             IValidator<UpdateTransactionRequest> UpdateTransactionRequestValidator)
