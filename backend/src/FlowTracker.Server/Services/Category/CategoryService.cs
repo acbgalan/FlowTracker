@@ -13,6 +13,7 @@ namespace FlowTracker.Server.Services.Category
         private readonly ICategoryRepository _categoryRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
+        private string? _userId;
 
         public CategoryService(ICategoryRepository categoryRepository, ICurrentUserService currentUserService, IMapper mapper)
         {
@@ -25,17 +26,16 @@ namespace FlowTracker.Server.Services.Category
         {
             try
             {
-                var category = await _categoryRepository.GetAsync(id);
-                var categoryResponse = category != null ? _mapper.Map<CategoryResponse>(category) : null;
+                var userId = await GetUserIdCachedAsync();
+                var category = await _categoryRepository.GetAsync(id, userId!);
+                var categoryResponse = _mapper.Map<CategoryResponse>(category);
 
-                if (category != null)
-                {
-                    return SuccessResult<CategoryResponse>("Category retrieved successfully", StatusCodes.Status200OK, categoryResponse);
-                }
-                else
+                if (category == null)
                 {
                     return FailureResult<CategoryResponse>("Category not found", StatusCodes.Status404NotFound);
                 }
+
+                return SuccessResult<CategoryResponse>("Category retrieved successfully", StatusCodes.Status200OK, categoryResponse);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,8 @@ namespace FlowTracker.Server.Services.Category
         {
             try
             {
-                var categories = await _categoryRepository.GetAllAsync();
+                var userId = await GetUserIdCachedAsync();
+                var categories = await _categoryRepository.GetAllAsync(userId!);
                 var categoriesResponse = _mapper.Map<List<CategoryResponse>>(categories);
 
                 return SuccessResult<List<CategoryResponse>>("Categories retrieved successfully", StatusCodes.Status200OK, categoriesResponse);
@@ -67,27 +68,21 @@ namespace FlowTracker.Server.Services.Category
                     return FailureResult<CategoryResponse>("The request object is null", StatusCodes.Status400BadRequest);
                 }
 
-                bool exitsNameAndType = await _categoryRepository.ExitsByNameAndTypeAsync(createCategoryRequest.Name, createCategoryRequest.Type);
+                var userId = await GetUserIdCachedAsync();
+                bool exitsNameAndType = await _categoryRepository.ExitsByNameAndTypeAsync(createCategoryRequest.Name, createCategoryRequest.Type, userId!);
+
                 if (exitsNameAndType)
                 {
                     return FailureResult<CategoryResponse>("A category with that name and type already exists.", StatusCodes.Status409Conflict);
                 }
 
                 var category = _mapper.Map<Data.Entities.Category>(createCategoryRequest);
-                var userId = await _currentUserService.GetUserIdAsync();
                 category.UserId = userId;
                 await _categoryRepository.AddAsync(category);
-                int saveResult = await _categoryRepository.SaveAsync();
+                await _categoryRepository.SaveAsync();
 
-                if (saveResult > 0)
-                {
-                    var categoryResponse = _mapper.Map<CategoryResponse>(category);
-                    return SuccessResult<CategoryResponse>("Category created successfully", StatusCodes.Status201Created, categoryResponse);
-                }
-                else
-                {
-                    return FailureResult<CategoryResponse>("Unexpected value when creating a category", StatusCodes.Status500InternalServerError);
-                }
+                var categoryResponse = _mapper.Map<CategoryResponse>(category);
+                return SuccessResult<CategoryResponse>("Category created successfully", StatusCodes.Status201Created, categoryResponse);
             }
             catch (DbUpdateException ex)
             {
@@ -108,8 +103,8 @@ namespace FlowTracker.Server.Services.Category
                     return FailureResult("The request object is null", StatusCodes.Status400BadRequest);
                 }
 
-                var userId = await _currentUserService.GetUserIdAsync();
-                var category = await _categoryRepository.GetAsync(updateCategoryRequest.Id, userId);
+                var userId = await GetUserIdCachedAsync();
+                var category = await _categoryRepository.GetAsync(updateCategoryRequest.Id, userId!);
 
                 if (category == null)
                 {
@@ -118,16 +113,9 @@ namespace FlowTracker.Server.Services.Category
 
                 _mapper.Map(updateCategoryRequest, category);
                 await _categoryRepository.UpdateAsync(category);
-                int saveResult = await _categoryRepository.SaveAsync();
+                await _categoryRepository.SaveAsync();
 
-                if (saveResult > 0)
-                {
-                    return SuccessResult("Category updated successfully", StatusCodes.Status204NoContent);
-                }
-                else
-                {
-                    return FailureResult("Unexpected value when updating a category", StatusCodes.Status500InternalServerError);
-                }
+                return SuccessResult("Category updated successfully", StatusCodes.Status204NoContent);
             }
             catch (DbUpdateException ex)
             {
@@ -143,32 +131,18 @@ namespace FlowTracker.Server.Services.Category
         {
             try
             {
-                var category = await _categoryRepository.GetAsync(id);
+                var userId = await GetUserIdCachedAsync();
+                var category = await _categoryRepository.GetAsync(id, userId!);
 
                 if (category == null)
                 {
                     return FailureResult("Category not found", StatusCodes.Status404NotFound);
                 }
 
-                var userId = await _currentUserService.GetUserIdAsync();
-
-                if (category.UserId != userId)
-                {
-                    return FailureResult("User is not allowed to delete the category", StatusCodes.Status403Forbidden);
-                }
-
                 await _categoryRepository.DeleteAsync(category);
+                await _categoryRepository.SaveAsync();
 
-                int saveResult = await _categoryRepository.SaveAsync();
-
-                if (saveResult > 0)
-                {
-                    return SuccessResult("Category deleted successfully", StatusCodes.Status204NoContent);
-                }
-                else
-                {
-                    return FailureResult("Unexpected value when deleting category", StatusCodes.Status500InternalServerError);
-                }
+                return SuccessResult("Category deleted successfully", StatusCodes.Status204NoContent);
             }
             catch (DbUpdateException ex)
             {
@@ -178,6 +152,27 @@ namespace FlowTracker.Server.Services.Category
             {
                 return HandleGeneralException(ex);
             }
+        }
+
+        public async Task<bool> IsCategoryValidForUserAsync(int id)
+        {
+            var userId = await GetUserIdCachedAsync();
+            return await _categoryRepository.IsCategoryValidForUserAsync(id, userId!);
+        }
+
+        public async Task<bool> IsCategoryValidForUserAsync(int id, string userId)
+        {
+            return await _categoryRepository.IsCategoryValidForUserAsync(id, userId);
+        }
+
+        private async Task<string?> GetUserIdCachedAsync()
+        {
+            if (_userId == null)
+            {
+                _userId = await _currentUserService.GetUserIdAsync();
+            }
+
+            return _userId;
         }
 
     }

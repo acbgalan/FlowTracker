@@ -10,7 +10,7 @@ namespace FlowTracker.Data.Entities
         public int Id { get; set; }
         public required decimal Amount { get; set; }
         public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; }
         public int CategoryId { get; set; }
         public required string UserId { get; set; }
 

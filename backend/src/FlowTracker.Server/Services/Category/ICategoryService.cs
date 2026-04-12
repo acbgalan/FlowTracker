@@ -11,5 +11,7 @@ namespace FlowTracker.Server.Services.Category
         Task<ServiceResult<CategoryResponse>> CreateCategoryAsync(CreateCategoryRequest createCategoryRequest);
         Task<ServiceResult> UpdateCategoryAsync(UpdateCategoryRequest updateCategoryRequest);
         Task<ServiceResult> DeleteCategoryAsync(int id);
+        Task<bool> IsCategoryValidForUserAsync(int id);
+        Task<bool> IsCategoryValidForUserAsync(int id, string userId);
     }
 }

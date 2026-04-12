@@ -32,6 +32,11 @@ namespace FlowTracker.Data.Repositories
             return await _context.Categories.ToListAsync();
         }
 
+        public async Task<List<Category>> GetAllAsync(string userId)
+        {
+            return await _context.Categories.Where(x => x.UserId == null || x.UserId == userId).ToListAsync();
+        }
+
         public async Task UpdateAsync(Category entity)
         {
             await Task.Run(() =>
@@ -68,9 +73,9 @@ namespace FlowTracker.Data.Repositories
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> ExitsByNameAndTypeAsync(string name, TransactionType type)
+        public async Task<bool> ExitsByNameAndTypeAsync(string name, TransactionType type, string userId)
         {
-            bool exits = await _context.Categories.AnyAsync(x => x.Name.ToLower() == name.ToLower() && x.Type == type);
+            bool exits = await _context.Categories.AnyAsync(x => x.Name.ToLower() == name.ToLower() && x.Type == type && x.UserId == userId);
             return exits;
         }
 
@@ -78,5 +83,12 @@ namespace FlowTracker.Data.Repositories
         {
             return await _context.Categories.Where(x => x.Id == id && x.UserId == userId).FirstOrDefaultAsync();
         }
+
+        public async Task<bool> IsCategoryValidForUserAsync(int id, string userId)
+        {
+            return await _context.Categories.AnyAsync(x => x.Id == id && (x.UserId == null || x.UserId == userId));
+        }
+
+
     }
 }
