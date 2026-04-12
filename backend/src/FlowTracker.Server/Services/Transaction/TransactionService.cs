@@ -83,7 +83,9 @@ namespace FlowTracker.Server.Services.Transaction
                 transaction.UserId = userId!;
                 await _transactionRepository.AddAsync(transaction);
                 await _transactionRepository.SaveAsync();
-                var transactionResponse = _mapper.Map<TransactionResponse>(transaction);
+
+                var savedTransaction = await _transactionRepository.GetAsync(transaction.Id, userId!);
+                var transactionResponse = _mapper.Map<TransactionResponse>(savedTransaction);
 
                 return SuccessResult<TransactionResponse>("Transaction created successfully", StatusCodes.Status201Created, transactionResponse);
             }

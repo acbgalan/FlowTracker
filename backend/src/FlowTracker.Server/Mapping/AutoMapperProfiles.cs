@@ -12,7 +12,7 @@ namespace FlowTracker.Server.Mapping
         {
             CategoryMappings();
             UserMappings();
-
+            TransactionMappings();
         }
 
         private void CategoryMappings()
