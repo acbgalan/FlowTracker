@@ -120,7 +120,7 @@ namespace FlowTracker.Server.Controllers
 
             if (!serviceResult.Success)
             {
-                return StatusCodes(serviceResult.StatusCode, serviceResult.Message);
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
             }
 
             return NoContent();
