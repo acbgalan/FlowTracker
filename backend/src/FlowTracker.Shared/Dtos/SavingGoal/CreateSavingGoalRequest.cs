@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace FlowTracker.Shared.Dtos.SavingGoal
+{
+    public class CreateSavingGoalRequest
+    {
+        public required string Name { get; set; }
+        public decimal TargetAmount { get; set; }
+        public DateOnly? Deadline { get; set; }
+    }
+}
