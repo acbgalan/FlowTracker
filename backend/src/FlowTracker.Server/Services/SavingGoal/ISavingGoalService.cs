@@ -8,5 +8,7 @@ namespace FlowTracker.Server.Services.SavingGoal
         Task<ServiceResult<SavingGoalResponse>> GetSavingGoalAsync(int id);
         Task<ServiceResult<List<SavingGoalResponse>>> GetSavingGoalsAsync();
         Task<ServiceResult<SavingGoalResponse>> CreateSavingGoal(CreateSavingGoalRequest createSavingGoalRequest);
+        Task<ServiceResult> UpdateSavingGoal(UpdateSavingGoalRequest updateSavingGoalRequest);
+        Task<ServiceResult> DeleteSavingGoal(int id);
     }
 }

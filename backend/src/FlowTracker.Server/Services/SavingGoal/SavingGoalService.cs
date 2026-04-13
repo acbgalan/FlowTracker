@@ -4,6 +4,7 @@ using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Services.Common;
 using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Dtos.SavingGoal;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 
 namespace FlowTracker.Server.Services.SavingGoal
@@ -80,8 +81,36 @@ namespace FlowTracker.Server.Services.SavingGoal
             }
         }
 
+        public async Task<ServiceResult> UpdateSavingGoal(UpdateSavingGoalRequest updateSavingGoalRequest)
+        {
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
+                var savingGoal = await _savingGoalRepository.GetAsync(updateSavingGoalRequest.Id, userId!);
 
+                if (savingGoal == null)
+                {
+                    return FailureResult("Saving goal not found", StatusCodes.Status404NotFound);
+                }
 
+                _mapper.Map(updateSavingGoalRequest, savingGoal);
+                await _savingGoalRepository.SaveAsync();
+                return SuccessResult("Saving goal updated successfully", StatusCodes.Status204NoContent);
+            }
+            catch (DbUpdateException ex)
+            {
+                return HandleDbUpdateException(ex);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException(ex);
+            }
+        }
+
+        public Task<ServiceResult> DeleteSavingGoal(int id)
+        {
+            throw new NotImplementedException();
+        }
 
         private async Task<string?> GetUserIdCachedAsync()
         {
