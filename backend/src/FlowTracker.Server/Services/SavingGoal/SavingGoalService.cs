@@ -31,11 +31,11 @@ namespace FlowTracker.Server.Services.SavingGoal
 
                 if (savingGoal == null)
                 {
-                    return FailureResult<SavingGoalResponse>("Saving Goal not found", StatusCodes.Status404NotFound);
+                    return FailureResult<SavingGoalResponse>("Saving goal not found", StatusCodes.Status404NotFound);
                 }
 
                 var savingGoalResponse = _mapper.Map<SavingGoalResponse>(savingGoal);
-                return SuccessResult<SavingGoalResponse>("Saving Goal retrieved successfully", StatusCodes.Status200OK, savingGoalResponse);
+                return SuccessResult<SavingGoalResponse>("Saving goal retrieved successfully", StatusCodes.Status200OK, savingGoalResponse);
             }
             catch (Exception ex)
             {
@@ -51,11 +51,32 @@ namespace FlowTracker.Server.Services.SavingGoal
                 var savingGoals = await _savingGoalRepository.GetAllAsync(userId!);
                 var savingGoalsResponse = _mapper.Map<List<SavingGoalResponse>>(savingGoals);
 
-                return SuccessResult<List<SavingGoalResponse>>("", StatusCodes.Status200OK, savingGoalsResponse);
+                return SuccessResult<List<SavingGoalResponse>>("Saving goal retrieved successfully", StatusCodes.Status200OK, savingGoalsResponse);
             }
             catch (Exception ex)
             {
                 return HandleGeneralException<List<SavingGoalResponse>>(ex);
+            }
+        }
+
+        public async Task<ServiceResult<SavingGoalResponse>> CreateSavingGoal(CreateSavingGoalRequest createSavingGoalRequest)
+        {
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
+                var savingGoal = _mapper.Map<FlowTracker.Data.Entities.SavingGoal>(createSavingGoalRequest);
+                savingGoal.UserId = userId!;
+
+                await _savingGoalRepository.AddAsync(savingGoal);
+                await _savingGoalRepository.SaveAsync();
+
+                var savingGoalResponse = _mapper.Map<SavingGoalResponse>(savingGoal);
+
+                return SuccessResult<SavingGoalResponse>("Saving goal created successfully", StatusCodes.Status201Created, savingGoalResponse);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException<SavingGoalResponse>(ex);
             }
         }
 

@@ -18,12 +18,12 @@ namespace FlowTracker.Server.Controllers
 
         public TransactionsController(
             ITransactionService transactionService,
-            IValidator<CreateTransactionRequest> CreateTransactionRequestValidator,
-            IValidator<UpdateTransactionRequest> UpdateTransactionRequestValidator)
+            IValidator<CreateTransactionRequest> createTransactionRequestValidator,
+            IValidator<UpdateTransactionRequest> updateTransactionRequestValidator)
         {
             _transactionService = transactionService;
-            _createTransactionRequestValidator = CreateTransactionRequestValidator;
-            _updateTransactionRequestValidator = UpdateTransactionRequestValidator;
+            _createTransactionRequestValidator = createTransactionRequestValidator;
+            _updateTransactionRequestValidator = updateTransactionRequestValidator;
         }
 
         [HttpGet("{id:int}", Name = "GetTransaction")]
