@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FlowTracker.Data.Entities;
 using FlowTracker.Shared.Dtos.Category;
+using FlowTracker.Shared.Dtos.SavingGoal;
 using FlowTracker.Shared.Dtos.Transaction;
 using FlowTracker.Shared.Dtos.User;
 
@@ -13,6 +14,7 @@ namespace FlowTracker.Server.Mapping
             CategoryMappings();
             UserMappings();
             TransactionMappings();
+            SavingGoalMappings();
         }
 
         private void CategoryMappings()
@@ -38,6 +40,16 @@ namespace FlowTracker.Server.Mapping
 
             CreateMap<CreateTransactionRequest, Transaction>();
             CreateMap<UpdateTransactionRequest, Transaction>();
+        }
+
+        private void SavingGoalMappings()
+        {
+            CreateMap<SavingGoal, SavingGoalResponse>()
+                .ForMember(d => d.CurrentAmount, o => o.MapFrom(s => s.SavingLogs.Sum(x => x.Amount)))
+                .ForMember(d => d.ProgressPercentaje, o => o.MapFrom(s => s.TargetAmount > 0 ? Math.Round((s.SavingLogs.Sum(x => x.Amount) / s.TargetAmount) * 100, 2) : 0));
+
+            CreateMap<CreateSavingGoalRequest, SavingGoal>();
+            CreateMap<UpdateSavingGoalRequest, SavingGoal>();
         }
 
     }
