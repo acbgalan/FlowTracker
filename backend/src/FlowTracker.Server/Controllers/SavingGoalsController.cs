@@ -111,6 +111,22 @@ namespace FlowTracker.Server.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> DeleteSavingGoal(int id)
+        {
+            var serviceResult = await _savingGoalService.DeleteSavingGoal(id);
+
+            if (!serviceResult.Success)
+            {
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
+            }
+
+            return NoContent();
+        }
+
 
     }
 }

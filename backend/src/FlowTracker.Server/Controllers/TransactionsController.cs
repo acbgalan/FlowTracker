@@ -114,6 +114,9 @@ namespace FlowTracker.Server.Controllers
 
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteTransaction(int id)
         {
             var serviceResult = await _transactionService.DeleteTransactionAsync(id);

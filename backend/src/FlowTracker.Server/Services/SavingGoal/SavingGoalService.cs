@@ -107,9 +107,32 @@ namespace FlowTracker.Server.Services.SavingGoal
             }
         }
 
-        public Task<ServiceResult> DeleteSavingGoal(int id)
+        public async Task<ServiceResult> DeleteSavingGoal(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
+                var savingGoal = await _savingGoalRepository.GetAsync(id, userId!);
+
+                if (savingGoal == null)
+                {
+                    return FailureResult("Saving goal not found", StatusCodes.Status404NotFound);
+                }
+
+                await _savingGoalRepository.DeleteAsync(savingGoal);
+                await _savingGoalRepository.SaveAsync();
+
+                return SuccessResult("Saving goal deleted successfully", StatusCodes.Status204NoContent);
+
+            }
+            catch (DbUpdateException ex)
+            {
+                return HandleDbUpdateException(ex);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException(ex);
+            }
         }
 
         private async Task<string?> GetUserIdCachedAsync()
