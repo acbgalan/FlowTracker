@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Services.Common;
 using FlowTracker.Shared.Dtos.Common;
@@ -39,6 +40,22 @@ namespace FlowTracker.Server.Services.SavingGoal
             catch (Exception ex)
             {
                 return HandleGeneralException<SavingGoalResponse>(ex);
+            }
+        }
+
+        public async Task<ServiceResult<List<SavingGoalResponse>>> GetSavingGoalsAsync()
+        {
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
+                var savingGoals = await _savingGoalRepository.GetAllAsync(userId!);
+                var savingGoalsResponse = _mapper.Map<List<SavingGoalResponse>>(savingGoals);
+
+                return SuccessResult<List<SavingGoalResponse>>("", StatusCodes.Status200OK, savingGoalsResponse);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException<List<SavingGoalResponse>>(ex);
             }
         }
 

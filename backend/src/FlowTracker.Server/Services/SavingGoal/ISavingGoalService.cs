@@ -6,5 +6,6 @@ namespace FlowTracker.Server.Services.SavingGoal
     public interface ISavingGoalService
     {
         Task<ServiceResult<SavingGoalResponse>> GetSavingGoalAsync(int id);
+        Task<ServiceResult<List<SavingGoalResponse>>> GetSavingGoalsAsync();
     }
 }

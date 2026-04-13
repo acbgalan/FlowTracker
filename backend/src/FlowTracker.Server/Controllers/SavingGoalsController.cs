@@ -18,9 +18,24 @@ namespace FlowTracker.Server.Controllers
 
         [HttpGet("{id:int}", Name = "GetSavingGoal")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<SavingGoalResponse>> GetSavingGoal(int id)
         {
             var serviceResult = await _savingGoalService.GetSavingGoalAsync(id);
+
+            if (!serviceResult.Success)
+            {
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
+            }
+
+            return Ok(serviceResult.Data);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<SavingGoalResponse>>> GetAllSavingGoals()
+        {
+            var serviceResult = await _savingGoalService.GetSavingGoalsAsync();
 
             if (!serviceResult.Success)
             {
