@@ -15,13 +15,13 @@ namespace FlowTracker.Server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class CategoryController : ControllerBase
+    public class CategoriesController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
         private readonly IValidator<CreateCategoryRequest> _createCategoryRequestValidator;
         private readonly IValidator<UpdateCategoryRequest> _updateCategoryRequestValidator;
 
-        public CategoryController(
+        public CategoriesController(
             ICategoryService categoryService,
             IValidator<CreateCategoryRequest> createCategoryRequestValidator,
             IValidator<UpdateCategoryRequest> updateCategoryRequestValidator)

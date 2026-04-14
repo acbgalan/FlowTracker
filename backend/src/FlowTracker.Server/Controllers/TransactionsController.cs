@@ -10,20 +10,20 @@ namespace FlowTracker.Server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class TransactionController : ControllerBase
+    public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
         private readonly IValidator<CreateTransactionRequest> _createTransactionRequestValidator;
         private readonly IValidator<UpdateTransactionRequest> _updateTransactionRequestValidator;
 
-        public TransactionController(
+        public TransactionsController(
             ITransactionService transactionService,
-            IValidator<CreateTransactionRequest> CreateTransactionRequestValidator,
-            IValidator<UpdateTransactionRequest> UpdateTransactionRequestValidator)
+            IValidator<CreateTransactionRequest> createTransactionRequestValidator,
+            IValidator<UpdateTransactionRequest> updateTransactionRequestValidator)
         {
             _transactionService = transactionService;
-            _createTransactionRequestValidator = CreateTransactionRequestValidator;
-            _updateTransactionRequestValidator = UpdateTransactionRequestValidator;
+            _createTransactionRequestValidator = createTransactionRequestValidator;
+            _updateTransactionRequestValidator = updateTransactionRequestValidator;
         }
 
         [HttpGet("{id:int}", Name = "GetTransaction")]
@@ -114,13 +114,16 @@ namespace FlowTracker.Server.Controllers
 
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteTransaction(int id)
         {
             var serviceResult = await _transactionService.DeleteTransactionAsync(id);
 
             if (!serviceResult.Success)
             {
-                return StatusCodes(serviceResult.StatusCode, serviceResult.Message);
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
             }
 
             return NoContent();

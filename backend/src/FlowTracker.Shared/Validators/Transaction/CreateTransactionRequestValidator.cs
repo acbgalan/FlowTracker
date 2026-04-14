@@ -11,7 +11,7 @@ namespace FlowTracker.Shared.Validators.Transaction
         public CreateTransactionRequestValidator()
         {
             RuleFor(x => x.Amount)
-                .GreaterThanOrEqualTo(0).WithMessage("The amount must be greater than 0.");                
+                .GreaterThanOrEqualTo(0).WithMessage("The amount must be greater than 0.");
 
             RuleFor(x => x.Date)
                 .NotEmpty().WithMessage("The date is required.");

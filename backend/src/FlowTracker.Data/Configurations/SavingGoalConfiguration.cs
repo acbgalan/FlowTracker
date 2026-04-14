@@ -28,10 +28,6 @@ namespace FlowTracker.Data.Configurations
                 .IsRequired()
                 .HasPrecision(18, 2);
 
-            builder.Property(s => s.CurrentAmount)
-                .IsRequired()
-                .HasPrecision(18, 2);
-
             builder.Property(s => s.Deadline)
                 .IsRequired(false)
                 .HasColumnType("date");
