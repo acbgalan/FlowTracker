@@ -41,12 +41,10 @@ namespace FlowTracker.Data.Repositories
             return await _context.SavingGoals.Include(x => x.SavingLogs).Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task UpdateAsync(SavingGoal entity)
+        public Task UpdateAsync(SavingGoal entity)
         {
-            await Task.Run(() =>
-            {
-                _context.SavingGoals.Update(entity);
-            });
+            _context.SavingGoals.Update(entity);
+            return Task.CompletedTask;
         }
 
         public async Task DeleteAsync(int id)
@@ -59,12 +57,11 @@ namespace FlowTracker.Data.Repositories
             }
         }
 
-        public async Task DeleteAsync(SavingGoal entity)
+        public Task DeleteAsync(SavingGoal entity)
         {
-            await Task.Run(() =>
-            {
-                _context.SavingGoals.Remove(entity);
-            });
+            _context.SavingGoals.Remove(entity);
+            return Task.CompletedTask;
+
         }
 
         public async Task<bool> ExitsAsync(int id)

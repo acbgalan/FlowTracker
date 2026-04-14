@@ -42,12 +42,10 @@ namespace FlowTracker.Data.Repositories
             return await _context.Transactions.Include(x => x.Category).Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task UpdateAsync(Transaction entity)
+        public Task UpdateAsync(Transaction entity)
         {
-            await Task.Run(() =>
-            {
-                _context.Transactions.Update(entity);
-            });
+            _context.Transactions.Update(entity);
+            return Task.CompletedTask;
         }
 
         public async Task DeleteAsync(int id)
@@ -60,12 +58,10 @@ namespace FlowTracker.Data.Repositories
             }
         }
 
-        public async Task DeleteAsync(Transaction entity)
+        public Task DeleteAsync(Transaction entity)
         {
-            await Task.Run(() =>
-            {
-                _context.Transactions.Remove(entity);
-            });
+            _context.Transactions.Remove(entity);
+            return Task.CompletedTask;
         }
 
         public async Task<bool> ExitsAsync(int id)
