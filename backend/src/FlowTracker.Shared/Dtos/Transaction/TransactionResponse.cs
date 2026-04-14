@@ -14,6 +14,5 @@ namespace FlowTracker.Shared.Dtos.Transaction
         public required string Type { get; set; }
         public required string Icon { get; set; }
         public required string CategoryDescription { get; set; }
-        public required string UserId { get; set; }
     }
 }
