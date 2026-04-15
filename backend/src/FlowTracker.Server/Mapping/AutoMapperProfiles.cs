@@ -2,6 +2,7 @@
 using FlowTracker.Data.Entities;
 using FlowTracker.Shared.Dtos.Category;
 using FlowTracker.Shared.Dtos.SavingGoal;
+using FlowTracker.Shared.Dtos.SavingLog;
 using FlowTracker.Shared.Dtos.Transaction;
 using FlowTracker.Shared.Dtos.User;
 
@@ -15,6 +16,7 @@ namespace FlowTracker.Server.Mapping
             UserMappings();
             TransactionMappings();
             SavingGoalMappings();
+            SavingLogMappings();
         }
 
         private void CategoryMappings()
@@ -50,6 +52,12 @@ namespace FlowTracker.Server.Mapping
 
             CreateMap<CreateSavingGoalRequest, SavingGoal>();
             CreateMap<UpdateSavingGoalRequest, SavingGoal>();
+        }
+
+        private void SavingLogMappings()
+        {
+            CreateMap<CreateSavingLogRequest, SavingLog>();
+
         }
 
     }
