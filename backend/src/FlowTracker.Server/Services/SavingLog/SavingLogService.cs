@@ -15,6 +15,7 @@ namespace FlowTracker.Server.Services.SavingLog
         private readonly ISavingGoalService _savingGoalService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
+        private string? _userId;
 
         public SavingLogService(
             ISavingLogRepository savingLogRepository,
@@ -28,17 +29,53 @@ namespace FlowTracker.Server.Services.SavingLog
             _mapper = mapper;
         }
 
-
-        public async Task<ServiceResult<SavingLogResponse>> CreateSavingLog(CreateSavingLogRequest createSavingLogRequest)
+        public async Task<ServiceResult<SavingLogResponse>> GetSavingLogAsync(int id)
         {
             try
             {
-                var userId = await _currentUserService.GetUserIdAsync();
+                var userId = await GetUserIdCachedAsync();
+                var savingLog = await _savingLogRepository.GetAsync(id, userId!);
+
+                if (savingLog == null)
+                {
+                    return FailureResult<SavingLogResponse>("Saving log not found", StatusCodes.Status404NotFound);
+                }
+
+                var savingLogResponse = _mapper.Map<SavingLogResponse>(savingLog);
+                return SuccessResult<SavingLogResponse>("Saving log retrieved successfully", StatusCodes.Status200OK, savingLogResponse);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException<SavingLogResponse>(ex);
+            }
+        }
+
+        public async Task<ServiceResult<List<SavingLogResponse>>> GetSavingLogsAsync()
+        {
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
+                var savingLogs = await _savingLogRepository.GetAllAsync(userId!);
+                var savingLogsResponse = _mapper.Map<List<SavingLogResponse>>(savingLogs);
+
+                return SuccessResult<List<SavingLogResponse>>("", StatusCodes.Status200OK, savingLogsResponse);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException<List<SavingLogResponse>>(ex);
+            }
+        }
+
+        public async Task<ServiceResult<SavingLogResponse>> CreateSavingLogAsync(CreateSavingLogRequest createSavingLogRequest)
+        {
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
                 var savingGoalResult = await _savingGoalService.GetSavingGoalAsync(createSavingLogRequest.SavingGoalId);
 
                 if (!savingGoalResult.Success)
                 {
-                    return FailureResult<SavingLogResponse>("Saving log not found", StatusCodes.Status404NotFound);
+                    return FailureResult<SavingLogResponse>("Saving goal not found", StatusCodes.Status404NotFound);
                 }
 
                 var savingLog = _mapper.Map<Data.Entities.SavingLog>(createSavingLogRequest);
@@ -46,7 +83,7 @@ namespace FlowTracker.Server.Services.SavingLog
                 await _savingLogRepository.SaveAsync();
                 var savingLogResponse = _mapper.Map<SavingLogResponse>(savingLog);
 
-                return SuccessResult<SavingLogResponse>("Saving log created successfully", StatusCodes.Status200OK, savingLogResponse);
+                return SuccessResult<SavingLogResponse>("Saving log created successfully", StatusCodes.Status201Created, savingLogResponse);
             }
             catch (DbUpdateException ex)
             {
@@ -58,24 +95,74 @@ namespace FlowTracker.Server.Services.SavingLog
             }
         }
 
-        public Task<ServiceResult> DeleteSavingLog(int id)
+        public async Task<ServiceResult> UpdateSavingLogAsync(UpdateSavingLogRequest updateSavingLogRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
+                var savingGoalResult = await _savingGoalService.GetSavingGoalAsync(updateSavingLogRequest.SavingGoalId);
+
+                if (!savingGoalResult.Success)
+                {
+                    return FailureResult("Saving goal not found", StatusCodes.Status404NotFound);
+                }
+
+                var savingLog = await _savingLogRepository.GetAsync(updateSavingLogRequest.Id, userId!);
+
+                if (savingLog == null)
+                {
+                    return FailureResult("Saving log not found", StatusCodes.Status404NotFound);
+                }
+
+                _mapper.Map(updateSavingLogRequest, savingLog);
+                await _savingLogRepository.SaveAsync();
+                return SuccessResult("Saving log updated successfully", StatusCodes.Status204NoContent);
+            }
+            catch (DbUpdateException ex)
+            {
+                return HandleDbUpdateException(ex);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException(ex);
+            }
         }
 
-        public Task<ServiceResult<SavingLogResponse>> GetSavingLog(int id)
+        public async Task<ServiceResult> DeleteSavingLogAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var userId = await GetUserIdCachedAsync();
+                var savingLog = await _savingLogRepository.GetAsync(id, userId!);
+
+                if (savingLog == null)
+                {
+                    return FailureResult("Saving goal not found", StatusCodes.Status404NotFound);
+                }
+
+                await _savingLogRepository.DeleteAsync(savingLog);
+                await _savingLogRepository.SaveAsync();
+
+                return SuccessResult("Saving log deleted successfully", StatusCodes.Status204NoContent);
+            }
+            catch (DbUpdateException ex)
+            {
+                return HandleDbUpdateException(ex);
+            }
+            catch (Exception ex)
+            {
+                return HandleGeneralException(ex);
+            }
         }
 
-        public Task<ServiceResult<List<SavingLogResponse>>> GetSavingLogs()
+        private async Task<string?> GetUserIdCachedAsync()
         {
-            throw new NotImplementedException();
-        }
+            if (_userId == null)
+            {
+                _userId = await _currentUserService.GetUserIdAsync();
+            }
 
-        public Task<ServiceResult> UpdateSavingLog(UpdateSavingLogRequest updateSavingLogRequest)
-        {
-            throw new NotImplementedException();
+            return _userId;
         }
     }
 }

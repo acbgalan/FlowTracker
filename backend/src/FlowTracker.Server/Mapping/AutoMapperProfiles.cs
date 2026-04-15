@@ -57,7 +57,8 @@ namespace FlowTracker.Server.Mapping
         private void SavingLogMappings()
         {
             CreateMap<CreateSavingLogRequest, SavingLog>();
-
+            CreateMap<UpdateSavingLogRequest, SavingLog>();
+            CreateMap<SavingLog, SavingLogResponse>();
         }
 
     }

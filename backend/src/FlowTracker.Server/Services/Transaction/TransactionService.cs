@@ -147,7 +147,7 @@ namespace FlowTracker.Server.Services.Transaction
                 await _transactionRepository.DeleteAsync(transaction);
                 await _transactionRepository.SaveAsync();
 
-                return SuccessResult("Transaction deleted successfully", StatusCodes.Status200OK);
+                return SuccessResult("Transaction deleted successfully", StatusCodes.Status204NoContent);
             }
             catch (DbUpdateException ex)
             {
