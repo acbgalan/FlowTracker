@@ -75,7 +75,7 @@ namespace FlowTracker.Server.Services.SavingLog
 
                 if (!savingGoalResult.Success)
                 {
-                    return FailureResult<SavingLogResponse>("Saving goal not found", StatusCodes.Status404NotFound);
+                    return FailureResult<SavingLogResponse>("Saving goal not found", savingGoalResult.StatusCode);
                 }
 
                 var savingLog = _mapper.Map<Data.Entities.SavingLog>(createSavingLogRequest);
