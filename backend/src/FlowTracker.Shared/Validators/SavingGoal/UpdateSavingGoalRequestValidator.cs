@@ -11,7 +11,7 @@ namespace FlowTracker.Shared.Validators.SavingGoal
         public UpdateSavingGoalRequestValidator()
         {
             RuleFor(x => x.Id)
-                .GreaterThan(0).WithMessage("A valid saving goal id is required.");
+                .GreaterThan(0).WithMessage("A valid id is required.");
 
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("The name is required.")

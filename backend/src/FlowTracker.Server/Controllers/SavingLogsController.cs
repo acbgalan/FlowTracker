@@ -78,6 +78,44 @@ namespace FlowTracker.Server.Controllers
             return CreatedAtRoute("GetSavingLog", new { id = serviceResult.Data!.Id }, serviceResult.Data);
         }
 
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateSavingLog(int id, [FromBody] UpdateSavingLogRequest updateSavingLogRequest)
+        {
+            // 1. DTO validation
+            if (id != updateSavingLogRequest.Id)
+            {
+                return BadRequest("Id mismatch");
+            }
+
+            // 2. Service call
+            var serviceResult = await _savingLogService.UpdateSavingLogAsync(updateSavingLogRequest);
+
+            if (!serviceResult.Success)
+            {
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> DeleteSavingLog(int id)
+        {
+            var serviceResult = await _savingLogService.DeleteSavingLogAsync(id);
+
+            if (!serviceResult.Success)
+            {
+                return StatusCode(serviceResult.StatusCode, serviceResult.Message);
+            }
+
+            return NoContent();
+        }
 
 
     }
