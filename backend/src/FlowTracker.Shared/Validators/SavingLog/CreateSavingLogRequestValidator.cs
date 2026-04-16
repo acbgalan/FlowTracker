@@ -14,7 +14,7 @@ namespace FlowTracker.Shared.Validators.SavingLog
                 .GreaterThan(0).WithMessage("A valid SavingGoalId is required.");
 
             RuleFor(x => x.Amount)
-                .GreaterThan(0).WithMessage("A valid target amount is required.");
+                .GreaterThan(0).WithMessage("A valid movement amount amount is required.");
 
             RuleFor(x => x.Type)
                 .IsInEnum().WithMessage("The movement type provided is not valid.");
