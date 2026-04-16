@@ -11,7 +11,7 @@ namespace FlowTracker.Shared.Validators.SavingLog
         public CreateSavingLogRequestValidator()
         {
             RuleFor(x => x.SavingGoalId)
-                .GreaterThan(0).WithMessage("A valid SavinGoalId is required.");
+                .GreaterThan(0).WithMessage("A valid SavingGoalId is required.");
 
             RuleFor(x => x.Amount)
                 .GreaterThan(0).WithMessage("A valid target amount is required.");
