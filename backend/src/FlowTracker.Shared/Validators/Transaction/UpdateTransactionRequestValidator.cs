@@ -11,10 +11,10 @@ namespace FlowTracker.Shared.Validators.Transaction
         public UpdateTransactionRequestValidator()
         {
             RuleFor(x => x.Id)
-                .GreaterThan(0).WithMessage("A valid category is required.");
+                .GreaterThan(0).WithMessage("A valid saving goal id is required.");
 
             RuleFor(x => x.Amount)
-                .GreaterThanOrEqualTo(0).WithMessage("The amount must be greater than 0.");
+                .GreaterThanOrEqualTo(0).WithMessage("The amount must be greater than or equal to 0.");
 
             RuleFor(x => x.Date)
                 .NotEmpty().WithMessage("The date is required.");
