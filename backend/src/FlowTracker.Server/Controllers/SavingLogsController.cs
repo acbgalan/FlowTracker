@@ -15,11 +15,16 @@ namespace FlowTracker.Server.Controllers
     {
         private readonly ISavingLogService _savingLogService;
         private readonly IValidator<CreateSavingLogRequest> _createSavingLogRequestValidator;
+        private readonly IValidator<UpdateSavingLogRequest> _updateSavingLogRequestValidator;
 
-        public SavingLogsController(ISavingLogService savingLogService, IValidator<CreateSavingLogRequest> createSavingLogRequestValidator)
+        public SavingLogsController(
+            ISavingLogService savingLogService, 
+            IValidator<CreateSavingLogRequest> createSavingLogRequestValidator, 
+            IValidator<UpdateSavingLogRequest> updateSavingLogRequestValidator)
         {
             _savingLogService = savingLogService;
             _createSavingLogRequestValidator = createSavingLogRequestValidator;
+            _updateSavingLogRequestValidator = updateSavingLogRequestValidator;
         }
 
         [HttpGet("{id:int}", Name = "GetSavingLog")]
@@ -89,6 +94,13 @@ namespace FlowTracker.Server.Controllers
             if (id != updateSavingLogRequest.Id)
             {
                 return BadRequest("Id mismatch");
+            }
+
+            var validationResult = _updateSavingLogRequestValidator.Validate(updateSavingLogRequest);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.ToDictionary());
             }
 
             // 2. Service call
