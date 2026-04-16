@@ -104,7 +104,7 @@ namespace FlowTracker.Server.Services.SavingLog
 
                 if (!savingGoalResult.Success)
                 {
-                    return FailureResult("Saving goal not found", StatusCodes.Status404NotFound);
+                    return FailureResult("Saving goal not found", savingGoalResult.StatusCode);
                 }
 
                 var savingLog = await _savingLogRepository.GetAsync(updateSavingLogRequest.Id, userId!);
