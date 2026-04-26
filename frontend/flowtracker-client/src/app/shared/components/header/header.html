@@ -1,56 +1,68 @@
 <header>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
     <div class="container">
-        <a class="navbar-brand" href="#"><img src="images/logo.png" alt="Logo Flow Tracke" width="200"></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <a class="navbar-brand" href="#"><img src="images/logo.png" alt="Logo Flow Tracke" width="200"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <!-- <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Inicio</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Transacciones</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Categorías</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Presupuestos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Metas de ahorro</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Reportes</a>
-            </li> -->
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Menú
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Inicio</a></li>
-                    <li><a class="dropdown-item" href="#">Transacciones</a></li>
-                    <li><a class="dropdown-item" href="#">Categorías</a></li>
-                    <li><a class="dropdown-item" href="#">Metas de ahorro</a></li>
-                    <li><a class="dropdown-item" href="#">Reportes</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-                </ul>
-            </li>
-            <!-- <li class="nav-item">
-                <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-            </li> -->
+          <!-- <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Inicio</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">Transacciones</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">Categorías</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">Presupuestos</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">Metas de ahorro</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">Reportes</a>
+          </li> -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false">
+              Menú
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" routerLink="/home" routerLinkActive="active"><i class="bi bi-house-door"></i> Inicio</a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/transactions" routerLinkActive="active"><i class="bi bi-arrow-left-right"></i> Transacciones</a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/categories" routerLinkActive="active"><i class="bi bi-tags"></i> Categorías</a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/saving-goals" routerLinkActive="active"><i class="bi bi-piggy-bank"></i> Metas de ahorro</a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/reports" routerLinkActive="active"><i class="bi bi-clipboard-data"></i> Reportes</a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/categories"><i class="bi bi-box-arrow-left"></i> Cerrar sesión</a>
+              </li>
+            </ul>
+          </li>
+          <!-- <li class="nav-item">
+              <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+          </li> -->
         </ul>
         <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-            <button class="btn btn-outline-success" type="submit">Search</button>
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+          <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
-
-        
-
-        </div>
+      </div>
     </div>
-    </nav>
+  </nav>
 </header>
