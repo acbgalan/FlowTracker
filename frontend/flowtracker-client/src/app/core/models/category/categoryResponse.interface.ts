@@ -1,3 +1,5 @@
+import { Type } from "../type.enum";
+
 export interface CategoryResponse {
     id:          number;
     name:        string;
@@ -5,10 +7,4 @@ export interface CategoryResponse {
     icon:        string;
     description: string;
     userId:      string | null;
-}
-
-export enum Type {
-    Expense = "Expense",
-    Income = "Income",
-    Saving = "Saving",
 }
