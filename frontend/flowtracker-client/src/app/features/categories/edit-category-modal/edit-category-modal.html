@@ -1,10 +1,10 @@
-<div #modalElement class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel"
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
 	aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<form [formGroup]="form" (ngSubmit)="onSubmit()">
 				<div class="modal-header">
-					<h1 class="modal-title fs-5" id="createCategoryModalLabel">Nueva categoría</h1>
+					<h1 class="modal-title fs-5" id="editCategoryModalLabel">Editar categoría</h1>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
 				</div>
 
@@ -16,8 +16,8 @@
 					}
 
 					<div class="mb-3">
-						<label for="categoryName" class="form-label">Nombre</label>
-						<input id="categoryName" type="text" class="form-control"
+						<label for="editCategoryName" class="form-label">Nombre</label>
+						<input id="editCategoryName" type="text" class="form-control"
 							[class.is-invalid]="form.controls.name.invalid && form.controls.name.touched"
 							formControlName="name" maxlength="100" />
 						@if (form.controls.name.invalid && form.controls.name.touched) {
@@ -26,8 +26,8 @@
 					</div>
 
 					<div class="mb-3">
-						<label for="categoryType" class="form-label">Tipo</label>
-						<select id="categoryType" class="form-select" formControlName="type">
+						<label for="editCategoryType" class="form-label">Tipo</label>
+						<select id="editCategoryType" class="form-select" formControlName="type">
 							@for (type of typeOptions; track type) {
 							<option [value]="type">{{ type }}</option>
 							}
@@ -35,13 +35,14 @@
 					</div>
 
 					<!-- <div class="mb-3">
-						<label for="categoryIcon" class="form-label">Icono (opcional)</label>
-						<input id="categoryIcon" type="text" class="form-control" formControlName="icon" maxlength="50" />
+						<label for="editCategoryIcon" class="form-label">Icono (opcional)</label>
+						<input id="editCategoryIcon" type="text" class="form-control" formControlName="icon"
+							maxlength="50" />
 					</div> -->
 
 					<div>
-						<label for="categoryDescription" class="form-label">Descripción</label>
-						<textarea id="categoryDescription" class="form-control" rows="3"
+						<label for="editCategoryDescription" class="form-label">Descripción</label>
+						<textarea id="editCategoryDescription" class="form-control" rows="3"
 							[class.is-invalid]="form.controls.description.invalid && form.controls.description.touched"
 							formControlName="description" maxlength="300"></textarea>
 						@if (form.controls.description.invalid && form.controls.description.touched) {
@@ -51,12 +52,13 @@
 				</div>
 
 				<div class="modal-footer">
-					<button #dismissButton type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+					<button #dismissButton type="button" class="btn btn-outline-secondary"
+						data-bs-dismiss="modal">Cancelar</button>
 					<button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()">
 						@if (isSubmitting()) {
 						Guardando...
 						} @else {
-						Guardar categoría
+						Guardar cambios
 						}
 					</button>
 				</div>
@@ -69,7 +71,7 @@
 <div class="toast-container position-fixed bottom-0 end-0 p-3 category-toast-container">
 	<div class="toast show text-bg-success border-0 category-toast" role="status" aria-live="polite"
 		aria-atomic="true">
-		<div class="category-toast__message">Categoría creada correctamente.</div>
+		<div class="category-toast__message">Categoría actualizada correctamente.</div>
 		<button type="button" class="btn-close btn-close-white category-toast__close"
 			(click)="showSuccessToast.set(false)" aria-label="Cerrar notificación"></button>
 	</div>
