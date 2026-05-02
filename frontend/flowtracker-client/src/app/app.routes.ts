@@ -7,16 +7,18 @@ import { SavingGoals } from './features/saving-goals/saving-goals';
 import { Reports } from './features/reports/reports';
 import { Login } from './features/login/login';
 import { Register } from './features/register/register';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-    // Routes without layout
+    // Routes without layout (public)
     { path: 'login', component: Login },
     { path: 'register', component: Register},
     
-    // Rutas with layout
+    // Routes with layout (protected)
     {
         path: '',
         component: Layout,
+        canActivate: [authGuard],
         children: [
             { path: 'home', component: Dashboard },
             { path: 'categories', component: Categories },

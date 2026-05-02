@@ -49,9 +49,15 @@
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li>
-                <a class="dropdown-item" routerLink="/categories"><i class="bi bi-box-arrow-left"></i> Cerrar sesión</a>
-              </li>
+              @if (isAuthenticated()) {
+                <li>
+                  <a class="dropdown-item" role="button" (click)="onLogout()"><i class="bi bi-box-arrow-left"></i> Cerrar sesión</a>
+                </li>
+              } @else {
+                <li>
+                  <a class="dropdown-item" routerLink="/login"><i class="bi bi-box-arrow-in-right"></i> Iniciar sesión</a>
+                </li>
+              }
             </ul>
           </li>
           <!-- <li class="nav-item">
