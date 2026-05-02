@@ -1,20 +1,22 @@
 <main class="auth-page">
 	<section class="auth-card card border border-2 shadow">
 		<div class="card-body p-4 p-md-5">
-			<div class="text-center mb-4">
-				<h1 class="h3 mb-2">Please sign in</h1>
-				<p class="text-secondary mb-0">Use your account to continue.</p>
+			<div class="text-center mb-2 border-bottom">
+				<img src="/images/logo.png" alt="FlowTracker logo" class="auth-logo" />
 			</div>
-
+			<div class="text-center mb-4">
+				<h1 class="h3 mb-2">Inicia sesión</h1>
+				<p class="text-secondary mb-0">Usa tu cuenta para continuar.</p>
+			</div>			
 			<form novalidate>
 				<div class="mb-3">
-					<label for="loginEmail" class="form-label">Email address</label>
+					<label for="loginEmail" class="form-label">Dirección de email</label>
 					<input id="loginEmail" type="email" class="form-control form-control-lg"
-						placeholder="name@example.com" autocomplete="email" />
+						placeholder="nombre@ejemplo.com" autocomplete="email" />
 				</div>
 
 				<div class="mb-3">
-					<label for="loginPassword" class="form-label">Password</label>
+					<label for="loginPassword" class="form-label">Contraseña</label>
 					<input id="loginPassword" type="password" class="form-control form-control-lg"
 						placeholder="••••••••" autocomplete="current-password" />
 				</div>
@@ -22,17 +24,17 @@
 				<div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
 					<div class="form-check">
 						<input id="rememberMe" class="form-check-input" type="checkbox" />
-						<label class="form-check-label" for="rememberMe">Remember me</label>
+						<label class="form-check-label" for="rememberMe">Recordarme</label>
 					</div>
-					<a class="link-primary text-decoration-none" href="#">Forgot password?</a>
+					<a class="link-primary text-decoration-none" href="#">¿Olvidaste tu contraseña?</a>
 				</div>
 
-				<button type="button" class="btn btn-primary btn-lg w-100">Sign in</button>
+				<button type="button" class="btn btn-primary btn-lg w-100">Iniciar sesión</button>
 			</form>
 
 			<p class="text-center text-secondary mt-4 mb-0">
-				New here?
-				<a class="link-primary fw-semibold text-decoration-none" href="/register">Create an account</a>
+				¿Eres nuevo?
+				<a class="link-primary fw-semibold text-decoration-none" href="/register">Crea una cuenta</a>
 			</p>
 		</div>
 	</section>

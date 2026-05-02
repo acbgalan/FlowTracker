@@ -19,6 +19,14 @@
 	box-shadow: 0 1rem 2.25rem rgba(15, 23, 42, 0.12);
 }
 
+.auth-logo {
+	display: block;
+	margin: 0 auto 0.75rem;
+	width: 200px;
+	max-width: 100%;
+	height: auto;
+}
+
 .auth-card .card-body {
 	color: #0f172a;
 }
