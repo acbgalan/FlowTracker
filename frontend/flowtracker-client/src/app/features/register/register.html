@@ -1,1 +1,58 @@
-<p>register works!</p>
+<main class="auth-page auth-page--register">
+	<section class="auth-card card border border-2 shadow">
+		<div class="card-body p-4 p-md-5">
+			<div class="text-center mb-4">
+				<h1 class="h3 mb-2">Create your account</h1>
+				<p class="text-secondary mb-0">Start organizing your finances in minutes.</p>
+			</div>
+
+			<form novalidate>
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label for="firstName" class="form-label">First name</label>
+						<input id="firstName" type="text" class="form-control form-control-lg"
+							placeholder="Alex" autocomplete="given-name" />
+					</div>
+
+					<div class="col-md-6">
+						<label for="lastName" class="form-label">Last name</label>
+						<input id="lastName" type="text" class="form-control form-control-lg"
+							placeholder="Morgan" autocomplete="family-name" />
+					</div>
+				</div>
+
+				<div class="mb-3 mt-3">
+					<label for="registerEmail" class="form-label">Email address</label>
+					<input id="registerEmail" type="email" class="form-control form-control-lg"
+						placeholder="name@example.com" autocomplete="email" />
+				</div>
+
+				<div class="mb-3">
+					<label for="registerPassword" class="form-label">Password</label>
+					<input id="registerPassword" type="password" class="form-control form-control-lg"
+						placeholder="••••••••" autocomplete="new-password" />
+				</div>
+
+				<div class="mb-4">
+					<label for="confirmPassword" class="form-label">Confirm password</label>
+					<input id="confirmPassword" type="password" class="form-control form-control-lg"
+						placeholder="••••••••" autocomplete="new-password" />
+				</div>
+
+				<div class="form-check mb-4">
+					<input id="termsCheck" class="form-check-input" type="checkbox" />
+					<label class="form-check-label" for="termsCheck">
+						I agree to the terms and privacy policy
+					</label>
+				</div>
+
+				<button type="button" class="btn btn-primary btn-lg w-100">Create account</button>
+			</form>
+
+			<p class="text-center text-secondary mt-4 mb-0">
+				Already have an account?
+				<a class="link-primary fw-semibold text-decoration-none" href="/login">Sign in</a>
+			</p>
+		</div>
+	</section>
+</main>

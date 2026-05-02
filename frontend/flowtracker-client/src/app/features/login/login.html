@@ -1,1 +1,39 @@
-<p>register works!</p>
+<main class="auth-page">
+	<section class="auth-card card border border-2 shadow">
+		<div class="card-body p-4 p-md-5">
+			<div class="text-center mb-4">
+				<h1 class="h3 mb-2">Please sign in</h1>
+				<p class="text-secondary mb-0">Use your account to continue.</p>
+			</div>
+
+			<form novalidate>
+				<div class="mb-3">
+					<label for="loginEmail" class="form-label">Email address</label>
+					<input id="loginEmail" type="email" class="form-control form-control-lg"
+						placeholder="name@example.com" autocomplete="email" />
+				</div>
+
+				<div class="mb-3">
+					<label for="loginPassword" class="form-label">Password</label>
+					<input id="loginPassword" type="password" class="form-control form-control-lg"
+						placeholder="••••••••" autocomplete="current-password" />
+				</div>
+
+				<div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+					<div class="form-check">
+						<input id="rememberMe" class="form-check-input" type="checkbox" />
+						<label class="form-check-label" for="rememberMe">Remember me</label>
+					</div>
+					<a class="link-primary text-decoration-none" href="#">Forgot password?</a>
+				</div>
+
+				<button type="button" class="btn btn-primary btn-lg w-100">Sign in</button>
+			</form>
+
+			<p class="text-center text-secondary mt-4 mb-0">
+				New here?
+				<a class="link-primary fw-semibold text-decoration-none" href="/register">Create an account</a>
+			</p>
+		</div>
+	</section>
+</main>
