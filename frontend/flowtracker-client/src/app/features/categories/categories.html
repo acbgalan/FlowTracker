@@ -4,13 +4,24 @@
             <h2><i class="bi bi-tags"></i> Categorías</h2>
         </div>
         <div class="col text-end">
-            <button type="button" class="btn btn-outline-primary  btn-sm"><i class="bi bi-plus-lg"></i> Nueva
+            <button type="button" class="btn btn-outline-primary  btn-sm" data-bs-toggle="modal"
+                data-bs-target="#createCategoryModal"><i class="bi bi-plus-lg"></i> Nueva
                 categoría</button>
         </div>
     </div>
+    @if (errorMessage()) {
+    <div class="alert alert-danger" role="alert">
+        {{ errorMessage() }}
+    </div>
+    }
+
+    @if (isLoading()) {
+    <div class="text-secondary mb-3">Cargando categorías...</div>
+    }
+
     <table class="table table-hover">
         <thead>
-            <tr (click)="getListData()" class="table-dark">
+            <tr class="table-dark">
                 <th scope="col">Tipo</th>
                 <th scope="col">Nombre</th>
                 <th scope="col">Descripción</th>
@@ -18,19 +29,22 @@
             </tr>
         </thead>
         <tbody>
-                @for (category of categories; track $index) {
-                <tr>
-                    <td>{{category.type}}</td>
-                    <td>{{category.name}}</td>
-                    <td>{{category.description}}</td>
-                    <td class="text-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                            Editar</button>&nbsp;
-                        <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                            Eliminar</button>
-                    </td>
-                </tr>
-                }
+            @for (category of categories; track $index) {
+            <tr>
+                <td>{{category.type}}</td>
+                <td>{{category.name}}</td>
+                <td>{{category.description}}</td>
+                <td class="text-end">
+                    @if(category.userId != null){
+                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
+                        Editar</button>&nbsp;
+                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="prepareDelete(category)"
+                        data-bs-toggle="modal" data-bs-target="#deleteCategoryModal"><i class="bi bi-trash3"></i>
+                        Eliminar</button>
+                    }
+                </td>
+            </tr>
+            }
         </tbody>
     </table>
     <nav aria-label="Categories navigation">
@@ -51,3 +65,6 @@
         </ul>
     </nav>
 </div>
+
+<app-create-category-modal (created)="getListData()"></app-create-category-modal>
+<app-delete-category-modal [category]="categoryToDelete()" (deleted)="getListData()"></app-delete-category-modal>

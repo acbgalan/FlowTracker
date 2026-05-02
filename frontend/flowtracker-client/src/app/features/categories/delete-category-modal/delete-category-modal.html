@@ -1,1 +1,53 @@
-<p>delete-category-modal works!</p>
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="deleteCategoryModalLabel">Eliminar categoría</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+			</div>
+
+			<div class="modal-body">
+				@if (errorMessage()) {
+				<div class="alert alert-danger" role="alert">
+					{{ errorMessage() }}
+				</div>
+				}
+
+				<p class="mb-0">
+					@if (category()) {
+					¿Seguro que quieres eliminar la categoría <strong>{{ category()?.name }}</strong>?
+					} @else {
+					¿Seguro que quieres eliminar esta categoría?
+					}
+				</p>
+				<p class="text-secondary small mt-2 mb-0">Esta acción no se puede deshacer.</p>
+			</div>
+
+			<div class="modal-footer">
+				<button #dismissButton type="button" class="btn btn-outline-secondary"
+					data-bs-dismiss="modal">Cancelar</button>
+				<button type="button" class="btn btn-danger" (click)="onDelete()"
+					[disabled]="!category() || isDeleting()">
+					@if (isDeleting()) {
+					Eliminando...
+					} @else {
+					Sí, eliminar
+					}
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@if (showSuccessToast()) {
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+	<div class="toast show text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
+		<div class="d-flex align-items-center">
+			<div class="toast-body">Categoría eliminada correctamente.</div>
+			<button type="button" class="btn-close btn-close-white me-2 m-auto"
+				(click)="showSuccessToast.set(false)" aria-label="Cerrar notificación"></button>
+		</div>
+	</div>
+</div>
+}
