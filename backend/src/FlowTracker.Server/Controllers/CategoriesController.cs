@@ -3,6 +3,7 @@ using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Services.Category;
 using FlowTracker.Shared.Dtos.Category;
+using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Validators.Category;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -49,9 +50,9 @@ namespace FlowTracker.Server.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<CategoryResponse>>> GetAllCategories()
+        public async Task<ActionResult<PagedResponse<CategoryResponse>>> GetAllCategories([FromQuery] QueryParameters queryParameters)
         {
-            var serviceResult = await _categoryService.GetCategoriesAsync();
+            var serviceResult = await _categoryService.GetCategoriesAsync(queryParameters);
 
             if (!serviceResult.Success)
             {

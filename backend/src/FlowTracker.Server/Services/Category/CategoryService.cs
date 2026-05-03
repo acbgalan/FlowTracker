@@ -14,6 +14,7 @@ namespace FlowTracker.Server.Services.Category
         private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
         private string? _userId;
+        private readonly HashSet<string> validSortFields = new HashSet<string>() { "id", "name", "type", "description" };
 
         public CategoryService(ICategoryRepository categoryRepository, ICurrentUserService currentUserService, IMapper mapper)
         {
@@ -43,19 +44,39 @@ namespace FlowTracker.Server.Services.Category
             }
         }
 
-        public async Task<ServiceResult<List<CategoryResponse>>> GetCategoriesAsync()
+        public async Task<ServiceResult<PagedResponse<CategoryResponse>>> GetCategoriesAsync(QueryParameters queryParameters)
         {
             try
             {
-                var userId = await GetUserIdCachedAsync();
-                var categories = await _categoryRepository.GetAllAsync(userId!);
-                var categoriesResponse = _mapper.Map<List<CategoryResponse>>(categories);
+                //Move to Fluent Validation
+                //Sort validation
+                if (!string.IsNullOrWhiteSpace(queryParameters.SortBy) && !validSortFields.Contains(queryParameters.SortBy))
+                {
+                    return FailureResult<PagedResponse<CategoryResponse>>("Bad paramater", StatusCodes.Status400BadRequest);
+                }
 
-                return SuccessResult<List<CategoryResponse>>("Categories retrieved successfully", StatusCodes.Status200OK, categoriesResponse);
+                //Page and limit validation.
+                if (queryParameters.Page < 1 || queryParameters.Limit < 1)
+                {
+                    return FailureResult<PagedResponse<CategoryResponse>>("Bad paramater", StatusCodes.Status400BadRequest);
+                }
+
+                var userId = await GetUserIdCachedAsync();
+                var (filteredCategories, totalCount) = await _categoryRepository.GetAllAsync(queryParameters, userId!);
+
+                var pagedResponde = new PagedResponse<CategoryResponse>()
+                {
+                    Data = _mapper.Map<List<CategoryResponse>>(filteredCategories),
+                    Page = queryParameters.Page,
+                    Limit = queryParameters.Limit,
+                    Total = totalCount
+                };
+
+                return SuccessResult<PagedResponse<CategoryResponse>>("Categories retrieved successfully", StatusCodes.Status200OK, pagedResponde);
             }
             catch (Exception ex)
             {
-                return HandleGeneralException<List<CategoryResponse>>(ex);
+                return HandleGeneralException<PagedResponse<CategoryResponse>>(ex);
             }
         }
 

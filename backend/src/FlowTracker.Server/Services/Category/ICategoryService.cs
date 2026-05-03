@@ -7,7 +7,7 @@ namespace FlowTracker.Server.Services.Category
     public interface ICategoryService
     {
         Task<ServiceResult<CategoryResponse>> GetCategoryAsync(int id);
-        Task<ServiceResult<List<CategoryResponse>>> GetCategoriesAsync();
+        Task<ServiceResult<PagedResponse<CategoryResponse>>> GetCategoriesAsync(QueryParameters queryParameters);
         Task<ServiceResult<CategoryResponse>> CreateCategoryAsync(CreateCategoryRequest createCategoryRequest);
         Task<ServiceResult> UpdateCategoryAsync(UpdateCategoryRequest updateCategoryRequest);
         Task<ServiceResult> DeleteCategoryAsync(int id);

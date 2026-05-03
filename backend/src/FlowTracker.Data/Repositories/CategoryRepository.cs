@@ -1,5 +1,6 @@
 ﻿using FlowTracker.Data.Contexts;
 using FlowTracker.Data.Entities;
+using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -32,9 +33,52 @@ namespace FlowTracker.Data.Repositories
             return await _context.Categories.ToListAsync();
         }
 
-        public async Task<List<Category>> GetAllAsync(string userId)
+        public async Task<(List<Category> filteredCategories, int totalCount)> GetAllAsync(QueryParameters queryParameters, string userId)
         {
-            return await _context.Categories.Where(x => x.UserId == null || x.UserId == userId).ToListAsync();
+            IQueryable<Category> filteredCategories = _context.Categories;
+
+            //UserId filtering
+            filteredCategories = filteredCategories.Where(x => x.UserId == null || x.UserId == userId);
+
+            //SearchTerm filtering
+            if (!string.IsNullOrWhiteSpace(queryParameters.SearchTerm))
+            {
+                filteredCategories = filteredCategories.Where(x =>
+                    x.Type.ToString().ToLower().Contains(queryParameters.SearchTerm.ToLower()) ||
+                    x.Name.ToLower().Contains(queryParameters.SearchTerm.ToLower()) ||
+                    x.Description.ToLower().Contains(queryParameters.SearchTerm.ToLower()));
+            }
+
+            int totalCount = await filteredCategories.CountAsync();
+
+            if (!string.IsNullOrWhiteSpace(queryParameters.SortBy))
+            {
+                switch (queryParameters.SortBy.ToLower())
+                {
+                    case "name":
+                        filteredCategories = queryParameters.SortDesc ? filteredCategories.OrderByDescending(x => x.Name) : filteredCategories.OrderBy(x => x.Name);
+                        break;
+                    case "type":
+                        filteredCategories = queryParameters.SortDesc ? filteredCategories.OrderByDescending(x => x.Type) : filteredCategories.OrderBy(x => x.Type);
+                        break;
+                    case "description":
+                        filteredCategories = queryParameters.SortDesc ? filteredCategories.OrderByDescending(x => x.Description) : filteredCategories.OrderBy(x => x.Description);
+                        break;
+                    default:
+                        filteredCategories = queryParameters.SortDesc ? filteredCategories.OrderByDescending(x => x.Id) : filteredCategories.OrderBy(x => x.Id);
+                        break;
+                }
+            }
+            else
+            {
+                filteredCategories = queryParameters.SortDesc ? filteredCategories.OrderByDescending(x => x.Id) : filteredCategories.OrderBy(x => x.Id);
+            }
+
+            //Pagination
+            int skip = (queryParameters.Page - 1) * queryParameters.Limit;
+            filteredCategories = filteredCategories.Skip(skip).Take(queryParameters.Limit);
+
+            return (await filteredCategories.ToListAsync(), totalCount);
         }
 
         public Task UpdateAsync(Category entity)
