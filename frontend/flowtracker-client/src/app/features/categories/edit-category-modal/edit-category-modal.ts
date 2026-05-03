@@ -13,7 +13,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CategoryResponse } from '../../../core/models/category/categoryResponse.interface';
 import { UpdateCategoryRequestInterface } from '../../../core/models/category/updateCategoryRequest.interface';
-import { Type } from '../../../core/models/type.enum';
+import { Type } from '../../../core/models/enums/type.enum';
 import { CategoryService } from '../../../core/services/category.service';
 
 @Component({

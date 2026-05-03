@@ -1,4 +1,4 @@
-import { Type } from "../type.enum";
+import { Type } from "../enums/type.enum";
 
 export interface CategoryResponse {
     id:          number;

@@ -11,7 +11,7 @@ import {
 import { ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
 import { CategoryService } from '../../../core/services/category.service';
 import { CreateCategoryRequest } from '../../../core/models/category/createCategoryRequest.interface';
-import { Type } from '../../../core/models/type.enum';
+import { Type } from '../../../core/models/enums/type.enum';
 
 @Component({
   selector: 'app-create-category-modal',
