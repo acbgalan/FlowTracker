@@ -22,14 +22,41 @@
     <table class="table table-hover">
         <thead>
             <tr class="table-dark">
-                <th scope="col">Tipo</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Descripción</th>
+                <th scope="col" (click)="toggleSort('type')" style="cursor: pointer;">
+                    Tipo
+                    @if (sortBy() === 'type') {
+                        @if (sortDesc()) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
+                <th scope="col" (click)="toggleSort('name')" style="cursor: pointer;">
+                    Nombre
+                    @if (sortBy() === 'name') {
+                        @if (sortDesc()) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
+                <th scope="col" (click)="toggleSort('description')" style="cursor: pointer;">
+                    Descripción
+                    @if (sortBy() === 'description') {
+                        @if (sortDesc()) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
                 <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
-            @for (category of categories; track $index) {
+            @for (category of categories(); track category.id) {
             <tr>
                 <td>{{category.type}}</td>
                 <td>{{category.name}}</td>
@@ -49,17 +76,24 @@
         </tbody>
     </table>
     <nav aria-label="Categories navigation">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <small class="text-muted">
+                Mostrando {{ (currentPage() - 1) * itemsPerPage() + 1 }} - {{ Math.min(currentPage() * itemsPerPage(), totalItems()) }} de {{ totalItems() }} categorías
+            </small>
+        </div>
         <ul class="pagination justify-content-end">
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous">
+            <li class="page-item" [class.disabled]="currentPage() === 1">
+                <a class="page-link" (click)="prevPage()" role="button" [attr.aria-disabled]="currentPage() === 1">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next">
+            @for (page of [].constructor(totalPages()); let i = $index; track i) {
+                <li class="page-item" [class.active]="currentPage() === i + 1">
+                    <a class="page-link" (click)="goToPage(i + 1)" role="button">{{ i + 1 }}</a>
+                </li>
+            }
+            <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <a class="page-link" (click)="nextPage()" role="button" [attr.aria-disabled]="currentPage() === totalPages()">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
