@@ -1,7 +1,9 @@
 ﻿using FlowTracker.Data.Contexts;
 using FlowTracker.Data.Entities;
+using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Dtos.Transaction;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,9 +39,61 @@ namespace FlowTracker.Data.Repositories
             return await _context.Transactions.Include(x => x.Category).ToListAsync();
         }
 
-        public async Task<List<Transaction>> GetAllAsync(string userId)
+        public async Task<(List<Transaction> filteredTransactions, int totalCount)> GetAllAsync(QueryParameters queryParameters, string userId)
         {
-            return await _context.Transactions.Include(x => x.Category).Where(x => x.UserId == userId).ToListAsync();
+            IQueryable<Transaction> filteredTransactions = _context.Transactions;
+
+            //UserId filtering
+            filteredTransactions = filteredTransactions.Where(x => x.UserId == userId);
+
+            //SearchTerm filtering
+            if (!string.IsNullOrWhiteSpace(queryParameters.SearchTerm))
+            {
+                string searchTerm = queryParameters.SearchTerm.ToLower();
+
+                filteredTransactions = filteredTransactions.Where(x =>
+                x.Category.Type.ToString().ToLower().Contains(searchTerm) ||
+                x.Category.Name.ToLower().Contains(searchTerm) ||
+                x.Amount.ToString().ToLower().Contains(searchTerm) ||
+                x.Description.ToLower().Contains(searchTerm));
+            }
+
+            int totalCount = await filteredTransactions.CountAsync();
+
+            if (!string.IsNullOrWhiteSpace(queryParameters.SortBy))
+            {
+                switch (queryParameters.SortBy.ToLower())
+                {
+                    case "date":
+                        filteredTransactions = queryParameters.SortDesc ? filteredTransactions.OrderByDescending(x => x.Date) : filteredTransactions.OrderBy(x => x.Date);
+                        break;
+                    case "type":
+                        filteredTransactions = queryParameters.SortDesc ? filteredTransactions.OrderByDescending(x => x.Category.Type) : filteredTransactions.OrderBy(x => x.Category.Type);
+                        break;
+                    case "category":
+                        filteredTransactions = queryParameters.SortDesc ? filteredTransactions.OrderByDescending(x => x.Category.Name) : filteredTransactions.OrderBy(x => x.Category.Name);
+                        break;
+                    case "amount":
+                        filteredTransactions = queryParameters.SortDesc ? filteredTransactions.OrderByDescending(x => x.Amount) : filteredTransactions.OrderBy(x => x.Amount);
+                        break;
+                    case "description":
+                        filteredTransactions = queryParameters.SortDesc ? filteredTransactions.OrderByDescending(x => x.Description) : filteredTransactions.OrderBy(x => x.Description);
+                        break;
+                    default:
+                        filteredTransactions = queryParameters.SortDesc ? filteredTransactions.OrderByDescending(x => x.Id) : filteredTransactions.OrderBy(x => x.Id);
+                        break;
+                }
+            }
+            else
+            {
+                filteredTransactions = queryParameters.SortDesc ? filteredTransactions.OrderByDescending(x => x.Id) : filteredTransactions.OrderBy(x => x.Id);
+            }
+
+            //Pagination
+            int skip = (queryParameters.Page - 1) * queryParameters.Limit;
+            filteredTransactions = filteredTransactions.Skip(skip).Take(queryParameters.Limit);
+
+            return (await filteredTransactions.Include(x => x.Category).ToListAsync(), totalCount);
         }
 
         public Task UpdateAsync(Transaction entity)

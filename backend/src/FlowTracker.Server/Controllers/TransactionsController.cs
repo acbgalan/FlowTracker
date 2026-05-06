@@ -1,4 +1,5 @@
 ﻿using FlowTracker.Server.Services.Transaction;
+using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Dtos.Transaction;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -45,9 +46,9 @@ namespace FlowTracker.Server.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<TransactionResponse>>> GetAllTransactions()
+        public async Task<ActionResult<PagedResponse<TransactionResponse>>> GetAllTransactions([FromQuery] QueryParameters queryParameters)
         {
-            var serviceResult = await _transactionService.GetTransactionsAsync();
+            var serviceResult = await _transactionService.GetTransactionsAsync(queryParameters);
 
             if (!serviceResult.Success)
             {

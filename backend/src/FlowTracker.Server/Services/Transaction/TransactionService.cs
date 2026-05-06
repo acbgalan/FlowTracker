@@ -3,6 +3,7 @@ using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Services.Category;
 using FlowTracker.Server.Services.Common;
+using FlowTracker.Shared.Dtos.Category;
 using FlowTracker.Shared.Dtos.Common;
 using FlowTracker.Shared.Dtos.Transaction;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace FlowTracker.Server.Services.Transaction
         private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
         private string? _userId;
+        private readonly HashSet<string> validSortFields = new HashSet<string>() { "id", "date", "type", "category", "amount", "description" };
 
         public TransactionService(
             ITransactionRepository transactionRepository,
@@ -51,19 +53,40 @@ namespace FlowTracker.Server.Services.Transaction
             }
         }
 
-        public async Task<ServiceResult<List<TransactionResponse>>> GetTransactionsAsync()
+        public async Task<ServiceResult<PagedResponse<TransactionResponse>>> GetTransactionsAsync(QueryParameters queryParameters)
         {
             try
             {
-                var userId = await GetUserIdCachedAsync();
-                var transactions = await _transactionRepository.GetAllAsync(userId!);
-                var transactionsResponse = _mapper.Map<List<TransactionResponse>>(transactions);
+                //Move to Fluent Validation
+                //Sort validation
+                if (!string.IsNullOrWhiteSpace(queryParameters.SortBy) && !validSortFields.Contains(queryParameters.SortBy))
+                {
+                    return FailureResult<PagedResponse<TransactionResponse>>("Bad parameter", StatusCodes.Status400BadRequest);
 
-                return SuccessResult<List<TransactionResponse>>("Transactions retrieved successfully", StatusCodes.Status200OK, transactionsResponse);
+                }
+
+                //Page and limit validation
+                if (queryParameters.Page < 1 || queryParameters.Limit < 1)
+                {
+                    return FailureResult<PagedResponse<TransactionResponse>>("Bad paramater", StatusCodes.Status400BadRequest);
+                }
+
+                var userId = await GetUserIdCachedAsync();
+                var (filteredTransactions, totalCount) = await _transactionRepository.GetAllAsync(queryParameters, userId!);
+
+                var pagedResponse = new PagedResponse<TransactionResponse>
+                {
+                    Data = _mapper.Map<List<TransactionResponse>>(filteredTransactions),
+                    Page = queryParameters.Page,
+                    Limit = queryParameters.Limit,
+                    Total = totalCount
+                };
+
+                return SuccessResult<PagedResponse<TransactionResponse>>("Transactions retrieved successfully", StatusCodes.Status200OK, pagedResponse);
             }
             catch (Exception ex)
             {
-                return HandleGeneralException<List<TransactionResponse>>(ex);
+                return HandleGeneralException<PagedResponse<TransactionResponse>>(ex);
             }
         }
 

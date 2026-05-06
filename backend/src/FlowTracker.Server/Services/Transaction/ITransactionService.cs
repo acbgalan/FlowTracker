@@ -7,7 +7,7 @@ namespace FlowTracker.Server.Services.Transaction
     public interface ITransactionService
     {
         Task<ServiceResult<TransactionResponse>> GetTransactionAsync(int id);
-        Task<ServiceResult<List<TransactionResponse>>> GetTransactionsAsync();
+        Task<ServiceResult<PagedResponse<TransactionResponse>>> GetTransactionsAsync(QueryParameters queryParameters);
         Task<ServiceResult<TransactionResponse>> CreateTransactionAsync(CreateTransactionRequest createTransactionRequest);
         Task<ServiceResult> UpdateTransactionAsync(UpdateTransactionRequest updateTransactionRequest);
         Task<ServiceResult> DeleteTransactionAsync(int id);
