@@ -9,10 +9,10 @@
 				<p class="text-secondary mb-0">Usa tu cuenta para continuar.</p>
 			</div>
 
-			@if (errorMessage()) {
+			@if (errorMessage) {
 				<div class="alert alert-danger alert-dismissible fade show" role="alert">
-					{{ errorMessage() }}
-					<button type="button" class="btn-close" (click)="errorMessage.set(null)"></button>
+					{{ errorMessage }}
+					<button type="button" class="btn-close" (click)="dismissError()"></button>
 				</div>
 			}
 
@@ -23,16 +23,16 @@
 						id="loginEmail"
 						type="email"
 						class="form-control form-control-lg"
-						[class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+						[class.is-invalid]="emailControl.invalid && emailControl.touched"
 						formControlName="email"
 						placeholder="nombre@ejemplo.com"
 						autocomplete="email"
 					/>
 					<div class="invalid-feedback d-block">
-						@if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-							@if (loginForm.get('email')?.hasError('required')) {
+						@if (emailControl.invalid && emailControl.touched) {
+							@if (emailControl.hasError('required')) {
 								<span>El email es requerido.</span>
-							} @if (loginForm.get('email')?.hasError('email')) {
+							} @if (emailControl.hasError('email')) {
 								<span>Ingresa un email válido.</span>
 							}
 						}
@@ -45,16 +45,16 @@
 						id="loginPassword"
 						type="password"
 						class="form-control form-control-lg"
-						[class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+						[class.is-invalid]="passwordControl.invalid && passwordControl.touched"
 						formControlName="password"
 						placeholder="••••••••"
 						autocomplete="current-password"
 					/>
 					<div class="invalid-feedback d-block">
-						@if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-							@if (loginForm.get('password')?.hasError('required')) {
+						@if (passwordControl.invalid && passwordControl.touched) {
+							@if (passwordControl.hasError('required')) {
 								<span>La contraseña es requerida.</span>
-							} @if (loginForm.get('password')?.hasError('minlength')) {
+							} @if (passwordControl.hasError('minlength')) {
 								<span>Mínimo 6 caracteres.</span>
 							}
 						}
@@ -72,9 +72,9 @@
 				<button
 					type="submit"
 					class="btn btn-primary btn-lg w-100"
-					[disabled]="loginForm.invalid || isLoading()"
+					[disabled]="loginForm.invalid || isLoading"
 				>
-					@if (!isLoading()) {
+					@if (!isLoading) {
 						<span>Iniciar sesión</span>
 					} @else {
 						<span>

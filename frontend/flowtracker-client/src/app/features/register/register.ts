@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
+  FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
   ValidatorFn,
@@ -10,7 +11,6 @@ import {
 import { Router } from '@angular/router';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
-import { CommonModule } from '@angular/common';
 
 const passwordMatchValidator: ValidatorFn = (
   control: AbstractControl
@@ -26,7 +26,7 @@ const passwordMatchValidator: ValidatorFn = (
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,9 +37,33 @@ export class Register {
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  isLoading = signal(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
+  isLoading = false;
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
+
+  dismissError(): void {
+    this.errorMessage = null;
+  }
+
+  get firstNameControl() {
+    return this.registerForm.controls.firstName;
+  }
+
+  get emailControl() {
+    return this.registerForm.controls.email;
+  }
+
+  get passwordControl() {
+    return this.registerForm.controls.password;
+  }
+
+  get confirmPasswordControl() {
+    return this.registerForm.controls.confirmPassword;
+  }
+
+  get termsControl() {
+    return this.registerForm.controls.terms;
+  }
 
   registerForm = this.fb.nonNullable.group(
     {
@@ -54,11 +78,11 @@ export class Register {
   );
 
   onSubmit(): void {
-    if (this.registerForm.invalid || this.isLoading()) return;
+    if (this.registerForm.invalid || this.isLoading) return;
 
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
+    this.isLoading = true;
+    this.errorMessage = null;
+    this.successMessage = null;
 
     const formValue = this.registerForm.getRawValue();
     const registerRequest = {
@@ -71,17 +95,17 @@ export class Register {
     this.userService.registerUser(registerRequest).subscribe({
       next: (response) => {
         this.authService.saveToken(response.token, response.expiration);
-        this.isLoading.set(false);
-        this.successMessage.set('Cuenta creada exitosamente. Redirigiendo...');
+        this.isLoading = false;
+        this.successMessage = 'Cuenta creada exitosamente. Redirigiendo...';
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1500);
       },
       error: (error) => {
-        this.isLoading.set(false);
+        this.isLoading = false;
         const errorMsg =
           error?.error?.message || 'Error al crear la cuenta. Intenta de nuevo.';
-        this.errorMessage.set(errorMsg);
+        this.errorMessage = errorMsg;
       },
     });
   }

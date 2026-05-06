@@ -9,9 +9,9 @@
 				</div>
 
 				<div class="modal-body">
-					@if (errorMessage()) {
+					@if (errorMessage) {
 					<div class="alert alert-danger" role="alert">
-						{{ errorMessage() }}
+						{{ errorMessage }}
 					</div>
 					}
 
@@ -52,8 +52,8 @@
 
 				<div class="modal-footer">
 					<button #dismissButton type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-					<button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()">
-						@if (isSubmitting()) {
+					<button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting">
+						@if (isSubmitting) {
 						Guardando...
 						} @else {
 						Guardar categoría
@@ -65,13 +65,13 @@
 	</div>
 </div>
 
-@if (showSuccessToast()) {
+@if (showSuccessToast) {
 <div class="toast-container position-fixed bottom-0 end-0 p-3 category-toast-container">
 	<div class="toast show text-bg-success border-0 category-toast" role="status" aria-live="polite"
 		aria-atomic="true">
 		<div class="category-toast__message">Categoría creada correctamente.</div>
 		<button type="button" class="btn-close btn-close-white category-toast__close"
-			(click)="showSuccessToast.set(false)" aria-label="Cerrar notificación"></button>
+			(click)="closeSuccessToast()" aria-label="Cerrar notificación"></button>
 	</div>
 </div>
 }

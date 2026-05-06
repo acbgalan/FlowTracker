@@ -3,8 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CategoryResponse } from '../models/category/categoryResponse.interface';
 import { CreateCategoryRequest } from '../models/category/createCategoryRequest.interface';
-import { UpdateCategoryRequestInterface } from '../models/category/updateCategoryRequest.interface';
-import { PagedCategoryResponseInterface } from '../models/category/pagedCategoryResponse.interface';
+import { UpdateCategoryRequest } from '../models/category/updateCategoryRequest.interface';
+import { PagedCategoryResponse } from '../models/category/pagedCategoryResponse.interface';
 import { QueryParametersInterface } from '../models/common/queryParameters.interface';
 
 
@@ -15,9 +15,9 @@ export class CategoryService {
   private http = inject(HttpClient);
   private apiUrl = 'https://localhost:7229/api/Categories';
 
-  public getCategories(queryParams: QueryParametersInterface): Observable<PagedCategoryResponseInterface> {
+  public getCategories(queryParams: QueryParametersInterface): Observable<PagedCategoryResponse> {
     let params = new HttpParams();
-    
+
     if (queryParams.searchTerm) {
       params = params.set('searchTerm', queryParams.searchTerm);
     }
@@ -28,7 +28,7 @@ export class CategoryService {
     params = params.set('page', queryParams.page.toString());
     params = params.set('limit', queryParams.limit.toString());
 
-    return this.http.get<PagedCategoryResponseInterface>(this.apiUrl, { params });
+    return this.http.get<PagedCategoryResponse>(this.apiUrl, { params });
   }
 
   public getCategory(id: number): Observable<CategoryResponse> {
@@ -39,11 +39,11 @@ export class CategoryService {
     return this.http.post<CategoryResponse>(this.apiUrl, request);
   }
 
-  public updateCategory(id: number, request: UpdateCategoryRequestInterface):Observable<void>{
+  public updateCategory(id: number, request: UpdateCategoryRequest): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}`, request);
   }
 
-  public deleteCategory(id: number): Observable<void>{
+  public deleteCategory(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

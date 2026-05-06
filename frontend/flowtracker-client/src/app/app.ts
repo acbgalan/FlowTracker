@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { Layout } from "./shared/components/layout/layout";
 import { RouterOutlet } from '@angular/router';
 
@@ -9,5 +9,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('flowtracker-client');
+  protected readonly title = 'flowtracker-client';
 }

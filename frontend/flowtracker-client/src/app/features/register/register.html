@@ -9,16 +9,16 @@
 				<p class="text-secondary mb-0">Comienza a organizar tus finanzas en cuestión de minutos.</p>
 			</div>
 
-			@if (errorMessage()) {
+			@if (errorMessage) {
 				<div class="alert alert-danger alert-dismissible fade show" role="alert">
-					{{ errorMessage() }}
-					<button type="button" class="btn-close" (click)="errorMessage.set(null)"></button>
+					{{ errorMessage }}
+					<button type="button" class="btn-close" (click)="dismissError()"></button>
 				</div>
 			}
 
-			@if (successMessage()) {
+			@if (successMessage) {
 				<div class="alert alert-success alert-dismissible fade show" role="alert">
-					{{ successMessage() }}
+					{{ successMessage }}
 				</div>
 			}
 
@@ -30,16 +30,16 @@
 							id="firstName"
 							type="text"
 							class="form-control form-control-lg"
-							[class.is-invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
+							[class.is-invalid]="firstNameControl.invalid && firstNameControl.touched"
 							formControlName="firstName"
 							placeholder="Alex"
 							autocomplete="given-name"
 						/>
 						<div class="invalid-feedback d-block">
-							@if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
-								@if (registerForm.get('firstName')?.hasError('required')) {
+							@if (firstNameControl.invalid && firstNameControl.touched) {
+								@if (firstNameControl.hasError('required')) {
 									<span>El nombre es requerido.</span>
-								} @if (registerForm.get('firstName')?.hasError('minlength')) {
+								} @if (firstNameControl.hasError('minlength')) {
 									<span>Mínimo 2 caracteres.</span>
 								}
 							}
@@ -65,16 +65,16 @@
 						id="registerEmail"
 						type="email"
 						class="form-control form-control-lg"
-						[class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+						[class.is-invalid]="emailControl.invalid && emailControl.touched"
 						formControlName="email"
 						placeholder="nombre@ejemplo.com"
 						autocomplete="email"
 					/>
 					<div class="invalid-feedback d-block">
-						@if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
-							@if (registerForm.get('email')?.hasError('required')) {
+						@if (emailControl.invalid && emailControl.touched) {
+							@if (emailControl.hasError('required')) {
 								<span>El email es requerido.</span>
-							} @if (registerForm.get('email')?.hasError('email')) {
+							} @if (emailControl.hasError('email')) {
 								<span>Ingresa un email válido.</span>
 							}
 						}
@@ -87,16 +87,16 @@
 						id="registerPassword"
 						type="password"
 						class="form-control form-control-lg"
-						[class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+						[class.is-invalid]="passwordControl.invalid && passwordControl.touched"
 						formControlName="password"
 						placeholder="••••••••"
 						autocomplete="new-password"
 					/>
 					<div class="invalid-feedback d-block">
-						@if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
-							@if (registerForm.get('password')?.hasError('required')) {
+						@if (passwordControl.invalid && passwordControl.touched) {
+							@if (passwordControl.hasError('required')) {
 								<span>La contraseña es requerida.</span>
-							} @if (registerForm.get('password')?.hasError('minlength')) {
+							} @if (passwordControl.hasError('minlength')) {
 								<span>Mínimo 6 caracteres.</span>
 							}
 						}
@@ -109,18 +109,18 @@
 						id="confirmPassword"
 						type="password"
 						class="form-control form-control-lg"
-						[class.is-invalid]="(registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch')) && registerForm.get('confirmPassword')?.touched"
+						[class.is-invalid]="(confirmPasswordControl.invalid || registerForm.hasError('passwordMismatch')) && confirmPasswordControl.touched"
 						formControlName="confirmPassword"
 						placeholder="••••••••"
 						autocomplete="new-password"
 					/>
 					<div class="invalid-feedback d-block">
-						@if (registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) {
-							@if (registerForm.get('confirmPassword')?.hasError('required')) {
+						@if (confirmPasswordControl.invalid && confirmPasswordControl.touched) {
+							@if (confirmPasswordControl.hasError('required')) {
 								<span>Confirma tu contraseña.</span>
 							}
 						}
-						@if (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched) {
+						@if (registerForm.hasError('passwordMismatch') && confirmPasswordControl.touched) {
 							<div class="invalid-feedback d-block"><span>Las contraseñas no coinciden.</span></div>
 						}
 					</div>
@@ -130,7 +130,7 @@
 					<input
 						id="termsCheck"
 						class="form-check-input"
-						[class.is-invalid]="registerForm.get('terms')?.invalid && registerForm.get('terms')?.touched"
+						[class.is-invalid]="termsControl.invalid && termsControl.touched"
 						type="checkbox"
 						formControlName="terms"
 					/>
@@ -138,7 +138,7 @@
 						Estoy de acuerdo con los términos y la política de privacidad
 					</label>
 					<div class="invalid-feedback d-block">
-						@if (registerForm.get('terms')?.invalid && registerForm.get('terms')?.touched) {
+						@if (termsControl.invalid && termsControl.touched) {
 							<span>Debes aceptar los términos.</span>
 						}
 					</div>
@@ -147,9 +147,9 @@
 				<button
 					type="submit"
 					class="btn btn-primary btn-lg w-100"
-					[disabled]="registerForm.invalid || isLoading()"
+					[disabled]="registerForm.invalid || isLoading"
 				>
-					@if (!isLoading()) {
+					@if (!isLoading) {
 						<span>Crear cuenta</span>
 					} @else {
 						<span>

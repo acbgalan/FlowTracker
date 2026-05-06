@@ -4,366 +4,130 @@
             <h2><i class="bi bi-arrow-left-right"></i> Transacciones</h2>
         </div>
         <div class="col text-end">
-            <button type="button" class="btn btn-outline-primary  btn-sm"><i class="bi bi-plus-lg"></i> Nueva
+            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                data-bs-target="#createTransactionModal"><i class="bi bi-plus-lg"></i> Nueva
                 transacción</button>
         </div>
     </div>
+
+    @if (errorMessage) {
+    <div class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+    </div>
+    }
+
+    @if (isLoading) {
+    <div class="text-secondary mb-3">Cargando transacciones...</div>
+    }
+
     <table class="table table-hover">
         <thead>
             <tr class="table-dark">
-                <th scope="col">Fecha</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Categoría</th>
-                <th scope="col">Importe</th>
-                <th scope="col">Descripción</th>
+                <th scope="col" (click)="toggleSort('date')" style="cursor: pointer;">
+                    Fecha
+                    @if (sortBy === 'date') {
+                        @if (sortDesc) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
+                <th scope="col" (click)="toggleSort('type')" style="cursor: pointer;">
+                    Tipo
+                    @if (sortBy === 'type') {
+                        @if (sortDesc) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
+                <th scope="col" (click)="toggleSort('category')" style="cursor: pointer;">
+                    Categoría
+                    @if (sortBy === 'categoryName') {
+                        @if (sortDesc) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
+                <th scope="col" (click)="toggleSort('amount')" style="cursor: pointer;">
+                    Importe
+                    @if (sortBy === 'amount') {
+                        @if (sortDesc) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
+                <th scope="col" (click)="toggleSort('description')" style="cursor: pointer;">
+                    Descripción
+                    @if (sortBy === 'description') {
+                        @if (sortDesc) {
+                            <i class="bi bi-arrow-down"></i>
+                        } @else {
+                            <i class="bi bi-arrow-up"></i>
+                        }
+                    }
+                </th>
                 <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
+            @for (transaction of transactions; track transaction.id) {
             <tr>
-                <td>2026-04-01</td>
-                <td>Expense</td>
-                <td>Supermercado</td>
-                <td>-42.80 €</td>
-                <td>Compra semanal básica</td>
+                <td>{{ transaction.date | date: 'yyyy-MM-dd' }}</td>
+                <td>{{ transaction.type }}</td>
+                <td>{{ transaction.categoryName }}</td>
+                <td>
+                    <span [class.text-danger]="transaction.amount < 0" [class.text-success]="transaction.amount > 0">
+                        {{ transaction.amount | currency: 'EUR':'symbol':'1.2-2' }}
+                    </span>
+                </td>
+                <td>{{ transaction.description || '' }}</td>
                 <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="prepareEdit(transaction)"
+                        data-bs-toggle="modal" data-bs-target="#editTransactionModal"><i
+                            class="bi bi-pencil-square"></i>
                         Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
+                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="prepareDelete(transaction)"
+                        data-bs-toggle="modal" data-bs-target="#deleteTransactionModal"><i class="bi bi-trash3"></i>
                         Eliminar</button>
                 </td>
             </tr>
-            <tr>
-                <td>2026-04-02</td>
-                <td>Income</td>
-                <td>Nómina/Salario</td>
-                <td>1,725.00 €</td>
-                <td>Ingreso mensual habitual</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-02</td>
-                <td>Expense</td>
-                <td>Restauración</td>
-                <td>-18.50 €</td>
-                <td>Café y comida rápida</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-03</td>
-                <td>Saving</td>
-                <td>Ahorro e inversión</td>
-                <td>-150.00 €</td>
-                <td>Aporte mensual a la hucha</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-03</td>
-                <td>Expense</td>
-                <td>Transporte</td>
-                <td>-12.20 €</td>
-                <td>Gasolina para trayecto corto</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-04</td>
-                <td>Income</td>
-                <td>Freelance</td>
-                <td>240.00 €</td>
-                <td>Proyecto puntual entregado</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-04</td>
-                <td>Expense</td>
-                <td>Ocio</td>
-                <td>-29.99 €</td>
-                <td>Suscripción mensual</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-05</td>
-                <td>Expense</td>
-                <td>Servicios</td>
-                <td>-67.40 €</td>
-                <td>Factura de internet</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-05</td>
-                <td>Income</td>
-                <td>Inversiones</td>
-                <td>32.15 €</td>
-                <td>Intereses del mes</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-06</td>
-                <td>Expense</td>
-                <td>Compras</td>
-                <td>-85.00 €</td>
-                <td>Ropa de temporada</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-06</td>
-                <td>Income</td>
-                <td>Regalos</td>
-                <td>50.00 €</td>
-                <td>Regalo de cumpleaños</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-07</td>
-                <td>Expense</td>
-                <td>Salud</td>
-                <td>-14.30 €</td>
-                <td>Compra en farmacia</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-07</td>
-                <td>Expense</td>
-                <td>Vivienda</td>
-                <td>-650.00 €</td>
-                <td>Pago mensual del alquiler</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-08</td>
-                <td>Income</td>
-                <td>Venta</td>
-                <td>75.00 €</td>
-                <td>Venta de artículo usado</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-08</td>
-                <td>Expense</td>
-                <td>Viajes</td>
-                <td>-120.00 €</td>
-                <td>Reserva de hotel</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-09</td>
-                <td>Expense</td>
-                <td>Cuidado Personal</td>
-                <td>-22.00 €</td>
-                <td>Corte de pelo</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-09</td>
-                <td>Income</td>
-                <td>Inversiones</td>
-                <td>14.80 €</td>
-                <td>Dividendos recibidos</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-10</td>
-                <td>Expense</td>
-                <td>Supermercado</td>
-                <td>-33.10 €</td>
-                <td>Compra de productos frescos</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-10</td>
-                <td>Income</td>
-                <td>Freelance</td>
-                <td>180.00 €</td>
-                <td>Trabajo rápido entregado</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-11</td>
-                <td>Expense</td>
-                <td>Ocio</td>
-                <td>-9.99 €</td>
-                <td>Alquiler de película</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-11</td>
-                <td>Saving</td>
-                <td>Ahorro e inversión</td>
-                <td>-200.00 €</td>
-                <td>Ahorro adicional del mes</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-12</td>
-                <td>Expense</td>
-                <td>Restauración</td>
-                <td>-16.40 €</td>
-                <td>Comida a domicilio</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-12</td>
-                <td>Income</td>
-                <td>Venta</td>
-                <td>40.00 €</td>
-                <td>Venta de pequeño accesorio</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-13</td>
-                <td>Expense</td>
-                <td>Servicios</td>
-                <td>-72.00 €</td>
-                <td>Factura de luz</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2026-04-13</td>
-                <td>Expense</td>
-                <td>Transporte</td>
-                <td>-8.60 €</td>
-                <td>Billete de metro</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-square"></i>
-                        Editar</button>&nbsp;
-                    <button type="button" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i>
-                        Eliminar</button>
-                </td>
-            </tr>
-
-
+            }
         </tbody>
     </table>
-    <nav aria-label="Categories navigation">
+    <nav aria-label="Transactions navigation">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <small class="text-muted">
+                Mostrando {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} de {{ totalItems }} transacciones
+            </small>
+        </div>
         <ul class="pagination justify-content-end">
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+                <a class="page-link" (click)="prevPage()" role="button" [attr.aria-disabled]="currentPage === 1">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next">
+            @for (page of getPageNumbers(); track page) {
+            <li class="page-item" [class.active]="currentPage === page">
+                <a class="page-link" (click)="goToPage(page)" role="button">{{ page }}</a>
+            </li>
+            }
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <a class="page-link" (click)="nextPage()" role="button"
+                    [attr.aria-disabled]="currentPage === totalPages">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
         </ul>
     </nav>
 </div>
+
+<app-create-transaction-modal (created)="getListData()"></app-create-transaction-modal>
+<app-edit-transaction-modal [transaction]="transactionToEdit" (updated)="getListData()"></app-edit-transaction-modal>
+<app-delete-transaction-modal [transaction]="transactionToDelete" (deleted)="getListData()"></app-delete-transaction-modal>

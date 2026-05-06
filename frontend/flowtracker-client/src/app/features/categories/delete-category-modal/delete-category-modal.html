@@ -8,15 +8,15 @@
 			</div>
 
 			<div class="modal-body">
-				@if (errorMessage()) {
+				@if (errorMessage) {
 				<div class="alert alert-danger" role="alert">
-					{{ errorMessage() }}
+					{{ errorMessage }}
 				</div>
 				}
 
 				<p class="mb-0">
-					@if (category()) {
-					¿Seguro que quieres eliminar la categoría <strong>{{ category()?.name }}</strong>?
+					@if (category) {
+					¿Seguro que quieres eliminar la categoría <strong>{{ category.name }}</strong>?
 					} @else {
 					¿Seguro que quieres eliminar esta categoría?
 					}
@@ -28,8 +28,8 @@
 				<button #dismissButton type="button" class="btn btn-outline-secondary"
 					data-bs-dismiss="modal">Cancelar</button>
 				<button type="button" class="btn btn-danger" (click)="onDelete()"
-					[disabled]="!category() || isDeleting()">
-					@if (isDeleting()) {
+					[disabled]="!category || isDeleting">
+					@if (isDeleting) {
 					Eliminando...
 					} @else {
 					Sí, eliminar
@@ -40,13 +40,13 @@
 	</div>
 </div>
 
-@if (showSuccessToast()) {
+@if (showSuccessToast) {
 <div class="toast-container position-fixed bottom-0 end-0 p-3 category-toast-container">
 	<div class="toast show text-bg-success border-0 category-toast" role="status" aria-live="polite"
 		aria-atomic="true">
 		<div class="category-toast__message">Categoría eliminada correctamente.</div>
 		<button type="button" class="btn-close btn-close-white category-toast__close"
-			(click)="showSuccessToast.set(false)" aria-label="Cerrar notificación"></button>
+			(click)="closeSuccessToast()" aria-label="Cerrar notificación"></button>
 	</div>
 </div>
 }

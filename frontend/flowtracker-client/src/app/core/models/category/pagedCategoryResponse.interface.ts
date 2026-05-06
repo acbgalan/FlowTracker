@@ -1,6 +1,6 @@
 import { CategoryResponse } from "./categoryResponse.interface";
 
-export interface PagedCategoryResponseInterface {
+export interface PagedCategoryResponse {
     data: CategoryResponse[];
     page: number;
     limit: number;

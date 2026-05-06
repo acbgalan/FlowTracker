@@ -1,1 +1,92 @@
-<p>create-transaction-modal works!</p>
+<div class="modal fade" id="createTransactionModal" tabindex="-1" aria-labelledby="createTransactionModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<form [formGroup]="form" (ngSubmit)="onSubmit()">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="createTransactionModalLabel">Nueva transacción</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
+
+				<div class="modal-body">
+					@if (errorMessage) {
+					<div class="alert alert-danger" role="alert">
+						{{ errorMessage }}
+					</div>
+					}
+
+					@if (categoriesError) {
+					<div class="alert alert-warning" role="alert">
+						{{ categoriesError }}
+					</div>
+					}
+
+					<div class="mb-3">
+						<label for="transactionDate" class="form-label">Fecha</label>
+						<input id="transactionDate" type="date" class="form-control"
+							[class.is-invalid]="form.controls.date.invalid && form.controls.date.touched"
+							formControlName="date" />
+						@if (form.controls.date.invalid && form.controls.date.touched) {
+						<div class="invalid-feedback">La fecha es obligatoria.</div>
+						}
+					</div>
+
+					<div class="mb-3">
+						<label for="transactionAmount" class="form-label">Importe</label>
+						<input id="transactionAmount" type="number" class="form-control" step="0.01"
+							[class.is-invalid]="form.controls.amount.invalid && form.controls.amount.touched"
+							formControlName="amount" />
+						@if (form.controls.amount.invalid && form.controls.amount.touched) {
+						<div class="invalid-feedback">El importe debe ser mayor que 0.</div>
+						}
+					</div>
+
+					<div class="mb-3">
+						<label for="transactionCategory" class="form-label">Categoría</label>
+						<select id="transactionCategory" class="form-select"
+							[class.is-invalid]="form.controls.categoryId.invalid && form.controls.categoryId.touched"
+							formControlName="categoryId" [disabled]="isLoadingCategories">
+							<option value="0" disabled>Selecciona una categoría</option>
+							@for (category of categories; track category.id) {
+							<option [value]="category.id">{{ category.name }}</option>
+							}
+						</select>
+						@if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {
+						<div class="invalid-feedback">Selecciona una categoría válida.</div>
+						}
+					</div>
+
+					<div>
+						<label for="transactionDescription" class="form-label">Descripción (opcional)</label>
+						<textarea id="transactionDescription" class="form-control" rows="3" maxlength="300"
+							formControlName="description"></textarea>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button #dismissButton type="button" class="btn btn-outline-secondary"
+						data-bs-dismiss="modal">Cancelar</button>
+					<button type="submit" class="btn btn-primary"
+						[disabled]="form.invalid || isSubmitting || isLoadingCategories">
+						@if (isSubmitting) {
+						Guardando...
+						} @else {
+						Guardar transacción
+						}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+@if (showSuccessToast) {
+<div class="toast-container position-fixed bottom-0 end-0 p-3 category-toast-container">
+	<div class="toast show text-bg-success border-0 category-toast" role="status" aria-live="polite"
+		aria-atomic="true">
+		<div class="category-toast__message">Transacción creada correctamente.</div>
+		<button type="button" class="btn-close btn-close-white category-toast__close"
+			(click)="closeSuccessToast()" aria-label="Cerrar notificación"></button>
+	</div>
+</div>
+}

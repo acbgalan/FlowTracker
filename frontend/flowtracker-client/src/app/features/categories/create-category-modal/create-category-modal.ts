@@ -3,10 +3,10 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  viewChild,
+  ViewChild,
   inject,
-  output,
-  signal,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
 import { CategoryService } from '../../../core/services/category.service';
@@ -21,16 +21,16 @@ import { Type } from '../../../core/models/enums/type.enum';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateCategoryModal implements OnDestroy {
-  private dismissButton = viewChild<ElementRef<HTMLButtonElement>>('dismissButton');
+  @ViewChild('dismissButton') dismissButton!: ElementRef<HTMLButtonElement>;
   private toastTimeoutId: number | null = null;
 
   private formBuilder = inject(FormBuilder);
   private categoryService = inject(CategoryService);
 
-  public readonly created = output<void>();
-  public readonly isSubmitting = signal(false);
-  public readonly errorMessage = signal('');
-  public readonly showSuccessToast = signal(false);
+  @Output() public created = new EventEmitter<void>();
+  public isSubmitting = false;
+  public errorMessage = '';
+  public showSuccessToast = false;
   public readonly typeOptions = Object.values(Type);
 
   public readonly form = this.formBuilder.nonNullable.group({
@@ -40,8 +40,12 @@ export class CreateCategoryModal implements OnDestroy {
     description: ['', [Validators.required, Validators.maxLength(300)]],
   });
 
+  public closeSuccessToast(): void {
+    this.showSuccessToast = false;
+  }
+
   public onSubmit(): void {
-    if (this.form.invalid || this.isSubmitting()) {
+    if (this.form.invalid || this.isSubmitting) {
       this.form.markAllAsTouched();
       return;
     }
@@ -55,12 +59,12 @@ export class CreateCategoryModal implements OnDestroy {
       description: rawValue.description.trim(),
     };
 
-    this.isSubmitting.set(true);
-    this.errorMessage.set('');
+    this.isSubmitting = true;
+    this.errorMessage = '';
 
     this.categoryService.createCategory(request).subscribe({
       next: () => {
-        this.isSubmitting.set(false);
+        this.isSubmitting = false;
         this.form.reset({
           name: '',
           type: Type.Expense,
@@ -72,25 +76,25 @@ export class CreateCategoryModal implements OnDestroy {
         this.showSuccessToastMessage();
       },
       error: () => {
-        this.isSubmitting.set(false);
-        this.errorMessage.set('No se pudo crear la categoría. Intenta nuevamente.');
+        this.isSubmitting = false;
+        this.errorMessage = 'No se pudo crear la categoría. Intenta nuevamente.';
       },
     });
   }
 
   private hideModal(): void {
-    this.dismissButton()?.nativeElement.click();
+    this.dismissButton.nativeElement.click();
   }
 
   private showSuccessToastMessage(): void {
-    this.showSuccessToast.set(true);
+    this.showSuccessToast = true;
 
     if (this.toastTimeoutId !== null) {
       window.clearTimeout(this.toastTimeoutId);
     }
 
     this.toastTimeoutId = window.setTimeout(() => {
-      this.showSuccessToast.set(false);
+      this.showSuccessToast = false;
       this.toastTimeoutId = null;
     }, 3000);
   }

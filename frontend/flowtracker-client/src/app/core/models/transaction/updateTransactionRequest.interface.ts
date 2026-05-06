@@ -1,7 +1,7 @@
-export interface UpdateTransactionResponseInterface {
+export interface UpdateTransactionRequest {
     id: number;
     amount: number;
     date: string;
-    description: null;
+    description: string | null;
     categoryId: number;
 }

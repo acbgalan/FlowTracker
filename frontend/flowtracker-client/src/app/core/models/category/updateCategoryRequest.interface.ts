@@ -1,6 +1,6 @@
 import { Type } from "../enums/type.enum";
 
-export interface UpdateCategoryRequestInterface {
+export interface UpdateCategoryRequest {
         id: number;
         name: string;
         type: Type;
