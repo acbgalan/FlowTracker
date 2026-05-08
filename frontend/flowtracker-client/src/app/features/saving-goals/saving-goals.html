@@ -1,1 +1,72 @@
-<p>saving-goals works!</p>
+<div class="container my-3">
+	<div class="row mb-3 align-items-center">
+		<div class="col">
+			<h2><i class="bi bi-piggy-bank"></i> Metas de ahorro</h2>
+		</div>
+		<div class="col text-end">
+			<button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+				data-bs-target="#createSavingGoalModal"><i class="bi bi-plus-lg"></i> Nueva meta
+				de ahorro</button>
+		</div>
+	</div>
+
+	@if (errorMessage) {
+	<div class="alert alert-danger" role="alert">
+		{{ errorMessage }}
+	</div>
+	}
+
+	@if (isLoading) {
+	<div class="text-secondary mb-3">Cargando metas de ahorro...</div>
+	}
+
+	<table class="table table-hover">
+		<thead>
+			<tr class="table-dark">
+				<th scope="col">Nombre</th>
+				<th scope="col">Meta</th>
+				<th scope="col">Ahorrado</th>
+				<th scope="col">Fecha</th>
+				<th scope="col"></th>
+			</tr>
+		</thead>
+		<tbody>
+			@for (goal of savingGoals; track goal.id) {
+			<tr>
+				<td>{{ goal.name }}</td>
+				<td>{{ goal.targetAmount | currency: 'EUR':'symbol':'1.2-2' }}</td>
+				<td class="align-middle">
+					<div class="progress" role="progressbar" data-bs-toggle="tooltip" data-bs-placement="top"
+						[attr.data-bs-title]="goal.currentAmount | currency: 'EUR':'symbol':'1.2-2'"
+						[attr.aria-valuenow]="goal.progressPercentaje"
+						aria-valuemin="0" aria-valuemax="100" tabindex="0">
+						<div class="progress-bar"
+							[style.width.%]="goal.progressPercentaje"
+							[style.backgroundColor]="getProgressColor(goal.progressPercentaje)">
+							{{ goal.progressPercentaje }}%
+						</div>
+					</div>
+				</td>
+				<td>
+					@if (goal.deadline) {
+					{{ goal.deadline | date: 'yyyy-MM-dd' }}
+					}
+				</td>
+				<td class="text-end">
+					<button type="button" class="btn btn-outline-secondary btn-sm" (click)="prepareEdit(goal)"
+						data-bs-toggle="modal" data-bs-target="#editSavingGoalModal"><i
+							class="bi bi-pencil-square"></i>
+						Editar</button>&nbsp;
+					<button type="button" class="btn btn-outline-danger btn-sm" (click)="prepareDelete(goal)"
+						data-bs-toggle="modal" data-bs-target="#deleteSavingGoalModal"><i class="bi bi-trash3"></i>
+						Eliminar</button>
+				</td>
+			</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+<app-create-saving-goal-modal (created)="getListData()"></app-create-saving-goal-modal>
+<app-edit-saving-goal-modal [savingGoal]="savingGoalToEdit" (updated)="getListData()"></app-edit-saving-goal-modal>
+<app-delete-saving-goal-modal [savingGoal]="savingGoalToDelete" (deleted)="getListData()"></app-delete-saving-goal-modal>

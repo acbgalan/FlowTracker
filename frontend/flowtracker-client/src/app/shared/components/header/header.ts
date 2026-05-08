@@ -18,6 +18,18 @@ export class Header {
 
   public searchQuery = '';
 
+  // Disable search on specific routes (saving-goals view)
+  public isSearchDisabled(): boolean {
+    try {
+      const url = this.router.url || '';
+      // Enabled only on categories and transactions
+      const enabled = url.startsWith('/categories') || url.startsWith('/transactions');
+      return !enabled;
+    } catch {
+      return false;
+    }
+  }
+
   onLogout(): void {
     this.authService.clearToken();
     this.router.navigate(['/login']);
@@ -29,6 +41,9 @@ export class Header {
 
   onSearch(event: Event): void {
     event.preventDefault();
+    if (this.isSearchDisabled()) {
+      return;
+    }
     this.searchService.setSearchTerm(this.searchQuery || null);
   }
 

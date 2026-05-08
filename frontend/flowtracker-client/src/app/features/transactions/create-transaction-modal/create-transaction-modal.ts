@@ -10,11 +10,18 @@ import {
   inject,
 } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
+import { Observable, of, switchMap } from 'rxjs';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { CategoryResponse } from '../../../core/models/category/categoryResponse.interface';
 import { CreateTransactionRequest } from '../../../core/models/transaction/createTransactionRequest.interface';
 import { QueryParametersInterface } from '../../../core/models/common/queryParameters.interface';
+import { SavingGoalService } from '../../../core/services/savingGoal.service';
+import { SavingGoalResponse } from '../../../core/models/savingGoal/saving-goal-response.interface';
+import { SavingLogService } from '../../../core/services/savingLog.service';
+import { CreateSavingLogRequest } from '../../../core/models/savingLog/create-saving-log-request.interface';
+import { MovementType } from '../../../core/models/enums/movementType.enum';
+import { Type } from '../../../core/models/enums/type.enum';
 
 @Component({
   selector: 'app-create-transaction-modal',
@@ -30,24 +37,33 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
   private formBuilder = inject(FormBuilder);
   private transactionService = inject(TransactionService);
   private categoryService = inject(CategoryService);
+  private savingGoalService = inject(SavingGoalService);
+  private savingLogService = inject(SavingLogService);
 
   @Output() public created = new EventEmitter<void>();
   public isSubmitting = false;
   public isLoadingCategories = false;
+  public isLoadingSavingGoals = false;
   public errorMessage = '';
   public categoriesError = '';
+  public savingGoalsError = '';
   public showSuccessToast = false;
   public categories: CategoryResponse[] = [];
+  public savingGoals: SavingGoalResponse[] = [];
+  public readonly Type = Type;
 
   public readonly form = this.formBuilder.nonNullable.group({
     date: ['', Validators.required],
     amount: [0, [Validators.required, Validators.min(0.01)]],
     categoryId: [0, [Validators.required, Validators.min(1)]],
+    savingGoalId: [0],
     description: ['', [Validators.maxLength(300)]],
   });
 
   public ngOnInit(): void {
     this.loadCategories();
+    this.loadSavingGoals();
+    this.syncSavingGoalState();
   }
 
   public closeSuccessToast(): void {
@@ -55,6 +71,8 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
   }
 
   public onSubmit(): void {
+    this.syncSavingGoalState();
+
     if (this.form.invalid || this.isSubmitting) {
       this.form.markAllAsTouched();
       return;
@@ -72,24 +90,72 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    this.transactionService.createTransaction(request).subscribe({
+    this.transactionService.createTransaction(request).pipe(
+      switchMap(() => this.createSavingLogIfNeeded(rawValue)),
+    ).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.form.reset({
           date: '',
           amount: 0,
           categoryId: 0,
+          savingGoalId: 0,
           description: '',
         });
+        this.syncSavingGoalState();
         this.created.emit();
         this.hideModal();
         this.showSuccessToastMessage();
       },
       error: () => {
         this.isSubmitting = false;
-        this.errorMessage = 'No se pudo crear la transacción. Intenta nuevamente.';
+        this.errorMessage = 'No se pudo crear la transacción o el registro de ahorro. Intenta nuevamente.';
       },
     });
+  }
+
+  public syncSavingGoalState(): void {
+    if (!this.isSavingCategorySelected()) {
+      this.form.controls.savingGoalId.setValue(0);
+      this.form.controls.savingGoalId.clearValidators();
+      this.form.controls.savingGoalId.updateValueAndValidity({ emitEvent: false });
+      return;
+    }
+
+    this.form.controls.savingGoalId.setValidators([Validators.required, Validators.min(1)]);
+    this.form.controls.savingGoalId.updateValueAndValidity({ emitEvent: false });
+  }
+
+  public isSavingCategorySelected(): boolean {
+    const categoryId = Number(this.form.controls.categoryId.value);
+    const selectedCategory = this.categories.find(category => category.id === categoryId);
+    return selectedCategory?.type === Type.Saving;
+  }
+
+  public isSavingCategoryDisabled(category: CategoryResponse): boolean {
+    return category.type === Type.Saving && this.savingGoals.length === 0;
+  }
+
+  private createSavingLogIfNeeded(rawValue: {
+    date: string;
+    amount: number;
+    categoryId: number;
+    savingGoalId: number;
+    description: string;
+  }): Observable<void> {
+    if (!this.isSavingCategorySelected()) {
+      return of(void 0);
+    }
+
+    const savingLogRequest: CreateSavingLogRequest = {
+      savingGoalId: Number(rawValue.savingGoalId),
+      amount: Number(rawValue.amount),
+      type: MovementType.Deposit,
+    };
+
+    return this.savingLogService.createSavingLog(savingLogRequest).pipe(
+      switchMap(() => of(void 0)),
+    );
   }
 
   private loadCategories(): void {
@@ -113,6 +179,25 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
         this.categories = [];
         this.isLoadingCategories = false;
         this.categoriesError = 'No se pudieron cargar las categorías.';
+      },
+    });
+  }
+
+  private loadSavingGoals(): void {
+    this.isLoadingSavingGoals = true;
+    this.savingGoalsError = '';
+
+    this.savingGoalService.getSavingGoals().subscribe({
+      next: response => {
+        this.savingGoals = response;
+        this.isLoadingSavingGoals = false;
+        this.syncSavingGoalState();
+      },
+      error: () => {
+        this.savingGoals = [];
+        this.isLoadingSavingGoals = false;
+        this.savingGoalsError = 'No se pudieron cargar las metas de ahorro.';
+        this.syncSavingGoalState();
       },
     });
   }

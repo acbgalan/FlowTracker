@@ -48,7 +48,7 @@
 							formControlName="categoryId" [disabled]="isLoadingCategories">
 							<option value="0" disabled>Selecciona una categoría</option>
 							@for (category of categories; track category.id) {
-							<option [value]="category.id">{{ category.name }}</option>
+							<option [value]="category.id">{{ category.type }} - {{ category.name }}</option>
 							}
 						</select>
 						@if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {

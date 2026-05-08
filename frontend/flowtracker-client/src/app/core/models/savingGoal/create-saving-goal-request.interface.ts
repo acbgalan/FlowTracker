@@ -1,5 +1,5 @@
 export interface CreateSavingGoalRequest {
     name: string;
     targetAmount: number;
-    deadline: null;
+    deadline: string | null;
 }

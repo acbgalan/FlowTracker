@@ -10,7 +10,7 @@ import { CreateSavingGoalRequest } from '../models/savingGoal/create-saving-goal
 })
 export class SavingGoalService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/SavingGoals';
+  private apiUrl = 'https://localhost:7229/api/SavingGoals';
 
   public getSavingGoals(): Observable<SavingGoalResponse[]> {
     return this.http.get<SavingGoalResponse[]>(this.apiUrl);

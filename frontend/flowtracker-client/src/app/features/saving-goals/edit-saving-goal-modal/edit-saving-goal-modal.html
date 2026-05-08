@@ -1,0 +1,70 @@
+<div class="modal fade" id="editSavingGoalModal" tabindex="-1" aria-labelledby="editSavingGoalModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<form [formGroup]="form" (ngSubmit)="onSubmit()">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="editSavingGoalModalLabel">Editar meta de ahorro</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
+
+				<div class="modal-body">
+					@if (errorMessage) {
+					<div class="alert alert-danger" role="alert">
+						{{ errorMessage }}
+					</div>
+					}
+
+					<div class="mb-3">
+						<label for="editSavingGoalName" class="form-label">Nombre</label>
+						<input id="editSavingGoalName" type="text" class="form-control"
+							[class.is-invalid]="form.controls.name.invalid && form.controls.name.touched"
+							formControlName="name" maxlength="100" />
+						@if (form.controls.name.invalid && form.controls.name.touched) {
+						<div class="invalid-feedback">El nombre es obligatorio.</div>
+						}
+					</div>
+
+					<div class="mb-3">
+						<label for="editSavingGoalTarget" class="form-label">Meta</label>
+						<input id="editSavingGoalTarget" type="number" class="form-control" step="0.01"
+							[class.is-invalid]="form.controls.targetAmount.invalid && form.controls.targetAmount.touched"
+							formControlName="targetAmount" />
+						@if (form.controls.targetAmount.invalid && form.controls.targetAmount.touched) {
+						<div class="invalid-feedback">La meta debe ser mayor que 0.</div>
+						}
+					</div>
+
+					<div>
+						<label for="editSavingGoalDeadline" class="form-label">Fecha (opcional)</label>
+						<input id="editSavingGoalDeadline" type="date" class="form-control"
+							placeholder="dd/mm/aaaa" formControlName="deadline" />
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button #dismissButton type="button" class="btn btn-outline-secondary"
+						data-bs-dismiss="modal">Cancelar</button>
+					<button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting">
+						@if (isSubmitting) {
+						Guardando...
+						} @else {
+						Guardar cambios
+						}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+@if (showSuccessToast) {
+<div class="toast-container position-fixed bottom-0 end-0 p-3 category-toast-container">
+	<div class="toast show text-bg-success border-0 category-toast" role="status" aria-live="polite"
+		aria-atomic="true">
+		<div class="category-toast__message">Meta de ahorro actualizada correctamente.</div>
+		<button type="button" class="btn-close btn-close-white category-toast__close" (click)="closeSuccessToast()"
+			aria-label="Cerrar notificación"></button>
+	</div>
+</div>
+}
