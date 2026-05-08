@@ -12,7 +12,9 @@ namespace FlowTracker.Data.Entities
         public decimal Amount { get; set; }
         public MovementType Type { get; set; }
         public DateTimeOffset Date { get; set; } = DateTimeOffset.UtcNow;
+        public int TransactionId { get; set; }
 
         public SavingGoal SavingGoal { get; set; } = null!;
+        public Transaction Transaction { get; set; } = null!;
     }
 }

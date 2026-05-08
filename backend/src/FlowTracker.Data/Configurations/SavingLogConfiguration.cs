@@ -20,6 +20,11 @@ namespace FlowTracker.Data.Configurations
                 .HasForeignKey(s => s.SavingGoalId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(s => s.Transaction)
+                .WithMany(t => t.SavingLogs)
+                .HasForeignKey(s => s.TransactionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Property(s => s.Amount)
                 .IsRequired()
                 .HasPrecision(18, 2);

@@ -36,6 +36,11 @@ namespace FlowTracker.Data.Configurations
                 .WithMany(u => u.Transactions)
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(t => t.SavingLogs)
+                .WithOne(s => s.Transaction)
+                .HasForeignKey(s => s.TransactionId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
