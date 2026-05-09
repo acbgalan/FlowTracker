@@ -13,16 +13,13 @@ import {
   inject,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, of, switchMap } from 'rxjs';
 import { CategoryResponse } from '../../../core/models/category/categoryResponse.interface';
 import { QueryParametersInterface } from '../../../core/models/common/queryParameters.interface';
-import { MovementType } from '../../../core/models/enums/movementType.enum';
+import { SavingGoalResponse } from '../../../core/models/savingGoal/saving-goal-response.interface';
 import { Type } from '../../../core/models/enums/type.enum';
-import { SavingLogResponse } from '../../../core/models/savingLog/saving-log-response.interface';
-import { UpdateSavingLogRequest } from '../../../core/models/savingLog/update-saving-log-request.interface';
 import { TransactionResponse } from '../../../core/models/transaction/transactionResponse.interface';
 import { UpdateTransactionRequest } from '../../../core/models/transaction/updateTransactionRequest.interface';
-import { SavingLogService } from '../../../core/services/savingLog.service';
+import { SavingGoalService } from '../../../core/services/savingGoal.service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CategoryService } from '../../../core/services/category.service';
 
@@ -40,26 +37,31 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
   private formBuilder = inject(FormBuilder);
   private transactionService = inject(TransactionService);
   private categoryService = inject(CategoryService);
-  private savingLogService = inject(SavingLogService);
+  private savingGoalService = inject(SavingGoalService);
 
   @Input() public transaction: TransactionResponse | null = null;
   @Output() public updated = new EventEmitter<void>();
   public isSubmitting = false;
   public isLoadingCategories = false;
+  public isLoadingSavingGoals = false;
   public errorMessage = '';
   public categoriesError = '';
+  public savingGoalsError = '';
   public showSuccessToast = false;
   public categories: CategoryResponse[] = [];
+  public savingGoals: SavingGoalResponse[] = [];
 
   public readonly form = this.formBuilder.nonNullable.group({
     date: ['', Validators.required],
     amount: [0, [Validators.required, Validators.min(0.01)]],
     categoryId: [0, [Validators.required, Validators.min(1)]],
+    savingGoalId: [0],
     description: ['', [Validators.maxLength(300)]],
   });
 
   public ngOnInit(): void {
     this.loadCategories();
+    this.loadSavingGoals();
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
@@ -88,26 +90,24 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
       date: rawValue.date,
       description: descriptionValue.length > 0 ? descriptionValue : null,
       categoryId: Number(rawValue.categoryId),
+      savingGoalId: this.isSavingCategorySelected() ? Number(rawValue.savingGoalId) : null,
     };
 
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    this.transactionService
-      .updateTransaction(selectedTransaction.id, request)
-      .pipe(switchMap(() => this.syncSavingLogForTransactionUpdate(selectedTransaction, rawValue)))
-      .subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          this.updated.emit();
-          this.hideModal();
-          this.showSuccessToastMessage();
-        },
-        error: () => {
-          this.isSubmitting = false;
-          this.errorMessage = 'No se pudo actualizar la transacción. Intenta nuevamente.';
-        },
-      });
+    this.transactionService.updateTransaction(selectedTransaction.id, request).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.updated.emit();
+        this.hideModal();
+        this.showSuccessToastMessage();
+      },
+      error: () => {
+        this.isSubmitting = false;
+        this.errorMessage = 'No se pudo actualizar la transacción. Intenta nuevamente.';
+      },
+    });
   }
 
   private loadCategories(): void {
@@ -136,6 +136,25 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
     });
   }
 
+  private loadSavingGoals(): void {
+    this.isLoadingSavingGoals = true;
+    this.savingGoalsError = '';
+
+    this.savingGoalService.getSavingGoals().subscribe({
+      next: response => {
+        this.savingGoals = response;
+        this.isLoadingSavingGoals = false;
+        this.syncSavingGoalState();
+      },
+      error: () => {
+        this.savingGoals = [];
+        this.isLoadingSavingGoals = false;
+        this.savingGoalsError = 'No se pudieron cargar las metas de ahorro.';
+        this.syncSavingGoalState();
+      },
+    });
+  }
+
   private syncFormWithTransaction(): void {
     const selectedTransaction = this.transaction;
 
@@ -144,15 +163,16 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
         date: '',
         amount: 0,
         categoryId: 0,
+        savingGoalId: 0,
         description: '',
       });
       this.errorMessage = '';
       this.isSubmitting = false;
+      this.syncSavingGoalState();
       return;
     }
 
     const categoryId =
-      selectedTransaction.categoryId ||
       this.findCategoryIdByName(selectedTransaction.categoryName) ||
       0;
 
@@ -160,10 +180,12 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
       date: this.toDateInputValue(selectedTransaction.date),
       amount: selectedTransaction.amount,
       categoryId,
+      savingGoalId: selectedTransaction.savingGoalId ?? 0,
       description: selectedTransaction.description ?? '',
     });
     this.errorMessage = '';
     this.isSubmitting = false;
+    this.syncSavingGoalState();
   }
 
   private findCategoryIdByName(name: string): number | null {
@@ -175,55 +197,22 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
     return this.categories.find(category => category.id === categoryId);
   }
 
-  private syncSavingLogForTransactionUpdate(
-    selectedTransaction: TransactionResponse,
-    rawValue: {
-      date: string;
-      amount: number;
-      categoryId: number;
-      description: string;
-    },
-  ): Observable<void> {
-    const nextCategory = this.findCategoryById(Number(rawValue.categoryId));
+  public isSavingCategorySelected(): boolean {
+    const categoryId = Number(this.form.controls.categoryId.value);
+    const selectedCategory = this.findCategoryById(categoryId);
+    return selectedCategory?.type === Type.Saving;
+  }
 
-    if (selectedTransaction.type !== Type.Saving && nextCategory?.type !== Type.Saving) {
-      return of(void 0);
+  private syncSavingGoalState(): void {
+    if (!this.isSavingCategorySelected()) {
+      this.form.controls.savingGoalId.setValue(0);
+      this.form.controls.savingGoalId.clearValidators();
+      this.form.controls.savingGoalId.updateValueAndValidity({ emitEvent: false });
+      return;
     }
 
-    return this.savingLogService.getSavingLogs().pipe(
-      switchMap((savingLogs: SavingLogResponse[]) => {
-        const relatedSavingLog = savingLogs.find(
-          savingLog => savingLog.transactionId === selectedTransaction.id,
-        );
-
-        if (!relatedSavingLog) {
-          return of(void 0);
-        }
-
-        if (selectedTransaction.type === Type.Saving && nextCategory?.type !== Type.Saving) {
-          return this.savingLogService.deleteSavingLog(relatedSavingLog.id).pipe(
-            switchMap(() => of(void 0)),
-          );
-        }
-
-        if (nextCategory?.type === Type.Saving) {
-          const savingLogRequest: UpdateSavingLogRequest = {
-            id: relatedSavingLog.id,
-            date: rawValue.date,
-            savingGoalId: relatedSavingLog.id,
-            amount: Number(rawValue.amount),
-            type: MovementType.Deposit,
-            transactionId: selectedTransaction.id,
-          };
-
-          return this.savingLogService.updateSavingLog(relatedSavingLog.id, savingLogRequest).pipe(
-            switchMap(() => of(void 0)),
-          );
-        }
-
-        return of(void 0);
-      }),
-    );
+    this.form.controls.savingGoalId.setValidators([Validators.required, Validators.min(1)]);
+    this.form.controls.savingGoalId.updateValueAndValidity({ emitEvent: false });
   }
 
   private toDateInputValue(value: string | Date): string {

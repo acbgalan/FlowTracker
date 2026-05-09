@@ -10,7 +10,6 @@ import {
   inject,
 } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
-import { Observable, of, switchMap } from 'rxjs';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { CategoryResponse } from '../../../core/models/category/categoryResponse.interface';
@@ -18,9 +17,6 @@ import { CreateTransactionRequest } from '../../../core/models/transaction/creat
 import { QueryParametersInterface } from '../../../core/models/common/queryParameters.interface';
 import { SavingGoalService } from '../../../core/services/savingGoal.service';
 import { SavingGoalResponse } from '../../../core/models/savingGoal/saving-goal-response.interface';
-import { SavingLogService } from '../../../core/services/savingLog.service';
-import { CreateSavingLogRequest } from '../../../core/models/savingLog/create-saving-log-request.interface';
-import { MovementType } from '../../../core/models/enums/movementType.enum';
 import { Type } from '../../../core/models/enums/type.enum';
 
 @Component({
@@ -38,7 +34,6 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
   private transactionService = inject(TransactionService);
   private categoryService = inject(CategoryService);
   private savingGoalService = inject(SavingGoalService);
-  private savingLogService = inject(SavingLogService);
 
   @Output() public created = new EventEmitter<void>();
   public isSubmitting = false;
@@ -85,14 +80,13 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
       date: rawValue.date,
       description: descriptionValue.length > 0 ? descriptionValue : null,
       categoryId: Number(rawValue.categoryId),
+      savingGoalId: this.isSavingCategorySelected() ? Number(rawValue.savingGoalId) : null,
     };
 
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    this.transactionService.createTransaction(request).pipe(
-      switchMap((transactionResponse) => this.createSavingLogIfNeeded(rawValue, transactionResponse.id)),
-    ).subscribe({
+    this.transactionService.createTransaction(request).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.form.reset({
@@ -109,7 +103,7 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
       },
       error: () => {
         this.isSubmitting = false;
-        this.errorMessage = 'No se pudo crear la transacción o el registro de ahorro. Intenta nuevamente.';
+        this.errorMessage = 'No se pudo crear la transacción. Intenta nuevamente.';
       },
     });
   }
@@ -134,30 +128,6 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
 
   public isSavingCategoryDisabled(category: CategoryResponse): boolean {
     return category.type === Type.Saving && this.savingGoals.length === 0;
-  }
-
-  private createSavingLogIfNeeded(rawValue: {
-    date: string;
-    amount: number;
-    categoryId: number;
-    savingGoalId: number;
-    description: string;
-  }, transactionId: number): Observable<void> {
-    if (!this.isSavingCategorySelected()) {
-      return of(void 0);
-    }
-
-    const savingLogRequest: CreateSavingLogRequest = {
-      date: rawValue.date,
-      savingGoalId: Number(rawValue.savingGoalId),
-      amount: Number(rawValue.amount),
-      type: MovementType.Deposit,
-      transactionId: transactionId,
-    };
-
-    return this.savingLogService.createSavingLog(savingLogRequest).pipe(
-      switchMap(() => of(void 0)),
-    );
   }
 
   private loadCategories(): void {

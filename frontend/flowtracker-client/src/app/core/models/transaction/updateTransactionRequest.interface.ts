@@ -4,4 +4,5 @@ export interface UpdateTransactionRequest {
     date: string;
     description: string | null;
     categoryId: number;
+    savingGoalId: number | null;
 }

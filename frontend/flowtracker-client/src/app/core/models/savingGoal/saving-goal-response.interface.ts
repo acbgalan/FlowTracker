@@ -3,6 +3,6 @@ export interface SavingGoalResponse {
     name: string;
     targetAmount: number;
     currentAmount: number;
-    deadline: Date;
+    deadline: Date | null;
     progressPercentaje: number;
 }

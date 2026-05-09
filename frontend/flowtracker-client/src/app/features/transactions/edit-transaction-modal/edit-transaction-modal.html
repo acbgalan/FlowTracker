@@ -21,6 +21,12 @@
 					</div>
 					}
 
+					@if (savingGoalsError) {
+					<div class="alert alert-warning" role="alert">
+						{{ savingGoalsError }}
+					</div>
+					}
+
 					<div class="mb-3">
 						<label for="editTransactionDate" class="form-label">Fecha</label>
 						<input id="editTransactionDate" type="date" class="form-control"
@@ -56,6 +62,23 @@
 						}
 					</div>
 
+					@if (isSavingCategorySelected()) {
+					<div class="mb-3">
+						<label for="editTransactionSavingGoal" class="form-label">Meta de ahorro</label>
+						<select id="editTransactionSavingGoal" class="form-select"
+							[class.is-invalid]="form.controls.savingGoalId.invalid && form.controls.savingGoalId.touched"
+							formControlName="savingGoalId" [disabled]="isLoadingSavingGoals || savingGoals.length === 0">
+							<option value="0" disabled>Selecciona una meta de ahorro</option>
+							@for (savingGoal of savingGoals; track savingGoal.id) {
+							<option [value]="savingGoal.id">{{ savingGoal.name }}</option>
+							}
+						</select>
+						@if (form.controls.savingGoalId.invalid && form.controls.savingGoalId.touched) {
+						<div class="invalid-feedback">Selecciona una meta de ahorro válida.</div>
+						}
+					</div>
+					}
+
 					<div>
 						<label for="editTransactionDescription" class="form-label">Descripción (opcional)</label>
 						<textarea id="editTransactionDescription" class="form-control" rows="3" maxlength="300"
@@ -67,7 +90,7 @@
 					<button #dismissButton type="button" class="btn btn-outline-secondary"
 						data-bs-dismiss="modal">Cancelar</button>
 					<button type="submit" class="btn btn-primary"
-						[disabled]="form.invalid || isSubmitting || isLoadingCategories">
+						[disabled]="form.invalid || isSubmitting || isLoadingCategories || isLoadingSavingGoals">
 						@if (isSubmitting) {
 						Guardando...
 						} @else {

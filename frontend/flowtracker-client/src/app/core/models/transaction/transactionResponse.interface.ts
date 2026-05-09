@@ -5,7 +5,7 @@ export interface TransactionResponse {
     amount: number;
     date: Date;
     description: string | null;
-    categoryId: number;
+    savingGoalId: number | null;
     categoryName: string;
     type: Type;
     icon: string;
