@@ -20,7 +20,6 @@ namespace FlowTracker.Data.Contexts
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<SavingGoal> SavingGoals { get; set; }
-        public DbSet<SavingLog> SavingLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,7 +52,6 @@ namespace FlowTracker.Data.Contexts
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
             modelBuilder.ApplyConfiguration(new BudgetConfiguration());
             modelBuilder.ApplyConfiguration(new SavingGoalConfiguration());
-            modelBuilder.ApplyConfiguration(new SavingLogConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
         }
     }

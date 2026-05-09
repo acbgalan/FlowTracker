@@ -13,9 +13,10 @@ namespace FlowTracker.Data.Entities
         public string? Description { get; set; }
         public int CategoryId { get; set; }
         public required string UserId { get; set; }
+        public int? SavingGoalId { get; set; }
 
         public Category Category { get; set; } = null!;
         public User User { get; set; } = null!;
-        public ICollection<SavingLog> SavingLogs { get; set; } = new List<SavingLog>();
+        public SavingGoal? SavingGoal { get; set; }
     }
 }

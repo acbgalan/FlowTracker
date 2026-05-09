@@ -24,6 +24,11 @@ namespace FlowTracker.Shared.Validators.Transaction
 
             RuleFor(x => x.CategoryId)
                 .GreaterThan(0).WithMessage("A valid category is required.");
+
+            RuleFor(x => x.SavingGoalId)
+                .GreaterThan(0)
+                .When(x => x.SavingGoalId.HasValue)
+                .WithMessage("A valid saving goal is required.");
         }
     }
 }

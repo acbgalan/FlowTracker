@@ -2,6 +2,7 @@
 using FlowTracker.Data.Entities;
 using FlowTracker.Data.Repositories;
 using FlowTracker.Server.Services.Category;
+using FlowTracker.Server.Services.SavingGoal;
 using FlowTracker.Server.Services.Common;
 using FlowTracker.Shared.Dtos.Category;
 using FlowTracker.Shared.Dtos.Common;
@@ -16,6 +17,7 @@ namespace FlowTracker.Server.Services.Transaction
         private readonly ITransactionRepository _transactionRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly ICategoryService _categoryService;
+        private readonly ISavingGoalService _savingGoalService;
         private readonly IMapper _mapper;
         private string? _userId;
         private readonly HashSet<string> validSortFields = new HashSet<string>() { "id", "date", "type", "category", "amount", "description" };
@@ -24,11 +26,13 @@ namespace FlowTracker.Server.Services.Transaction
             ITransactionRepository transactionRepository,
             ICurrentUserService currentUserService,
             ICategoryService categoryService,
+            ISavingGoalService savingGoalService,
             IMapper mapper)
         {
             _transactionRepository = transactionRepository;
             _currentUserService = currentUserService;
             _categoryService = categoryService;
+            _savingGoalService = savingGoalService;
             _mapper = mapper;
         }
 
@@ -102,6 +106,16 @@ namespace FlowTracker.Server.Services.Transaction
                     return FailureResult<TransactionResponse>("Invalid category selection", StatusCodes.Status400BadRequest);
                 }
 
+                if (createTransactionRequest.SavingGoalId.HasValue)
+                {
+                    var savingGoal = await _savingGoalService.GetSavingGoalAsync(createTransactionRequest.SavingGoalId.Value);
+
+                    if (!savingGoal.Success)
+                    {
+                        return FailureResult<TransactionResponse>("Saving goal not found", StatusCodes.Status404NotFound);
+                    }
+                }
+
                 var transaction = _mapper.Map<FlowTracker.Data.Entities.Transaction>(createTransactionRequest);
                 transaction.UserId = userId!;
                 await _transactionRepository.AddAsync(transaction);
@@ -132,6 +146,16 @@ namespace FlowTracker.Server.Services.Transaction
                 if (!isValidUserCategory)
                 {
                     return FailureResult("Invalid category selection", StatusCodes.Status400BadRequest);
+                }
+
+                if (updateTransactionRequest.SavingGoalId.HasValue)
+                {
+                    var savingGoal = await _savingGoalService.GetSavingGoalAsync(updateTransactionRequest.SavingGoalId.Value);
+
+                    if (!savingGoal.Success)
+                    {
+                        return FailureResult("Saving goal not found", StatusCodes.Status404NotFound);
+                    }
                 }
 
                 var transaction = await _transactionRepository.GetAsync(updateTransactionRequest.Id, userId!);

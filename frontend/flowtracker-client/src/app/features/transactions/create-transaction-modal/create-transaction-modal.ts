@@ -91,7 +91,7 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     this.transactionService.createTransaction(request).pipe(
-      switchMap(() => this.createSavingLogIfNeeded(rawValue)),
+      switchMap((transactionResponse) => this.createSavingLogIfNeeded(rawValue, transactionResponse.id)),
     ).subscribe({
       next: () => {
         this.isSubmitting = false;
@@ -142,15 +142,17 @@ export class CreateTransactionModal implements OnInit, OnDestroy {
     categoryId: number;
     savingGoalId: number;
     description: string;
-  }): Observable<void> {
+  }, transactionId: number): Observable<void> {
     if (!this.isSavingCategorySelected()) {
       return of(void 0);
     }
 
     const savingLogRequest: CreateSavingLogRequest = {
+      date: rawValue.date,
       savingGoalId: Number(rawValue.savingGoalId),
       amount: Number(rawValue.amount),
       type: MovementType.Deposit,
+      transactionId: transactionId,
     };
 
     return this.savingLogService.createSavingLog(savingLogRequest).pipe(

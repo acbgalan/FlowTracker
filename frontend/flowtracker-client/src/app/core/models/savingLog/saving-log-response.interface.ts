@@ -5,4 +5,5 @@ export interface SavingLogResponse {
     currentAmount: number;
     deadline: string | null;
     progressPercentaje: number;
+    transactionId: number;
 }

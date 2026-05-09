@@ -13,12 +13,18 @@ import {
   inject,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TransactionResponse } from '../../../core/models/transaction/transactionResponse.interface';
-import { UpdateTransactionRequest } from '../../../core/models/transaction/updateTransactionRequest.interface';
-import { TransactionService } from '../../../core/services/transaction.service';
-import { CategoryService } from '../../../core/services/category.service';
+import { Observable, of, switchMap } from 'rxjs';
 import { CategoryResponse } from '../../../core/models/category/categoryResponse.interface';
 import { QueryParametersInterface } from '../../../core/models/common/queryParameters.interface';
+import { MovementType } from '../../../core/models/enums/movementType.enum';
+import { Type } from '../../../core/models/enums/type.enum';
+import { SavingLogResponse } from '../../../core/models/savingLog/saving-log-response.interface';
+import { UpdateSavingLogRequest } from '../../../core/models/savingLog/update-saving-log-request.interface';
+import { TransactionResponse } from '../../../core/models/transaction/transactionResponse.interface';
+import { UpdateTransactionRequest } from '../../../core/models/transaction/updateTransactionRequest.interface';
+import { SavingLogService } from '../../../core/services/savingLog.service';
+import { TransactionService } from '../../../core/services/transaction.service';
+import { CategoryService } from '../../../core/services/category.service';
 
 @Component({
   selector: 'app-edit-transaction-modal',
@@ -34,6 +40,7 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
   private formBuilder = inject(FormBuilder);
   private transactionService = inject(TransactionService);
   private categoryService = inject(CategoryService);
+  private savingLogService = inject(SavingLogService);
 
   @Input() public transaction: TransactionResponse | null = null;
   @Output() public updated = new EventEmitter<void>();
@@ -88,6 +95,7 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
 
     this.transactionService
       .updateTransaction(selectedTransaction.id, request)
+      .pipe(switchMap(() => this.syncSavingLogForTransactionUpdate(selectedTransaction, rawValue)))
       .subscribe({
         next: () => {
           this.isSubmitting = false;
@@ -161,6 +169,61 @@ export class EditTransactionModal implements OnInit, OnChanges, OnDestroy {
   private findCategoryIdByName(name: string): number | null {
     const match = this.categories.find(category => category.name === name);
     return match ? match.id : null;
+  }
+
+  private findCategoryById(categoryId: number): CategoryResponse | undefined {
+    return this.categories.find(category => category.id === categoryId);
+  }
+
+  private syncSavingLogForTransactionUpdate(
+    selectedTransaction: TransactionResponse,
+    rawValue: {
+      date: string;
+      amount: number;
+      categoryId: number;
+      description: string;
+    },
+  ): Observable<void> {
+    const nextCategory = this.findCategoryById(Number(rawValue.categoryId));
+
+    if (selectedTransaction.type !== Type.Saving && nextCategory?.type !== Type.Saving) {
+      return of(void 0);
+    }
+
+    return this.savingLogService.getSavingLogs().pipe(
+      switchMap((savingLogs: SavingLogResponse[]) => {
+        const relatedSavingLog = savingLogs.find(
+          savingLog => savingLog.transactionId === selectedTransaction.id,
+        );
+
+        if (!relatedSavingLog) {
+          return of(void 0);
+        }
+
+        if (selectedTransaction.type === Type.Saving && nextCategory?.type !== Type.Saving) {
+          return this.savingLogService.deleteSavingLog(relatedSavingLog.id).pipe(
+            switchMap(() => of(void 0)),
+          );
+        }
+
+        if (nextCategory?.type === Type.Saving) {
+          const savingLogRequest: UpdateSavingLogRequest = {
+            id: relatedSavingLog.id,
+            date: rawValue.date,
+            savingGoalId: relatedSavingLog.id,
+            amount: Number(rawValue.amount),
+            type: MovementType.Deposit,
+            transactionId: selectedTransaction.id,
+          };
+
+          return this.savingLogService.updateSavingLog(relatedSavingLog.id, savingLogRequest).pipe(
+            switchMap(() => of(void 0)),
+          );
+        }
+
+        return of(void 0);
+      }),
+    );
   }
 
   private toDateInputValue(value: string | Date): string {

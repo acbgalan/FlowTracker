@@ -14,6 +14,6 @@ namespace FlowTracker.Data.Entities
         public DateOnly? Deadline { get; set; }
 
         public User User { get; set; } = null!;
-        public ICollection<SavingLog> SavingLogs { get; set; } = new List<SavingLog>();
+        public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>(); // Updated for new relationship
     }
 }

@@ -2,7 +2,6 @@
 using FlowTracker.Data.Entities;
 using FlowTracker.Shared.Dtos.Category;
 using FlowTracker.Shared.Dtos.SavingGoal;
-using FlowTracker.Shared.Dtos.SavingLog;
 using FlowTracker.Shared.Dtos.Transaction;
 using FlowTracker.Shared.Dtos.User;
 
@@ -16,14 +15,14 @@ namespace FlowTracker.Server.Mapping
             UserMappings();
             TransactionMappings();
             SavingGoalMappings();
-            SavingLogMappings();
         }
 
         private void CategoryMappings()
         {
             CreateMap<Category, CategoryResponse>();
             CreateMap<CreateCategoryRequest, Category>();
-            CreateMap<UpdateCategoryRequest, Category>();
+            CreateMap<UpdateCategoryRequest, Category>()
+                .ForMember(d => d.Icon, o => o.Condition((src, dest, srcMember) => srcMember != null));
         }
 
         private void UserMappings()
@@ -47,18 +46,11 @@ namespace FlowTracker.Server.Mapping
         private void SavingGoalMappings()
         {
             CreateMap<SavingGoal, SavingGoalResponse>()
-                .ForMember(d => d.CurrentAmount, o => o.MapFrom(s => s.SavingLogs.Sum(x => x.Amount)))
-                .ForMember(d => d.ProgressPercentaje, o => o.MapFrom(s => s.TargetAmount > 0 ? Math.Round((s.SavingLogs.Sum(x => x.Amount) / s.TargetAmount) * 100, 2) : 0));
+                .ForMember(d => d.CurrentAmount, o => o.MapFrom(s => s.Transactions.Sum(x => x.Amount)))
+                .ForMember(d => d.ProgressPercentaje, o => o.MapFrom(s => s.TargetAmount > 0 ? Math.Round((s.Transactions.Sum(x => x.Amount) / s.TargetAmount) * 100, 2) : 0));
 
             CreateMap<CreateSavingGoalRequest, SavingGoal>();
             CreateMap<UpdateSavingGoalRequest, SavingGoal>();
-        }
-
-        private void SavingLogMappings()
-        {
-            CreateMap<CreateSavingLogRequest, SavingLog>();
-            CreateMap<UpdateSavingLogRequest, SavingLog>();
-            CreateMap<SavingLog, SavingLogResponse>();
         }
 
     }
