@@ -1,7 +1,9 @@
 ﻿using FlowTracker.Data.Contexts;
 using FlowTracker.Data.Entities;
 using FlowTracker.Shared.Dtos.Common;
+using FlowTracker.Shared.Dtos.Dashboard;
 using FlowTracker.Shared.Dtos.Transaction;
+using FlowTracker.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
@@ -94,6 +96,58 @@ namespace FlowTracker.Data.Repositories
             filteredTransactions = filteredTransactions.Skip(skip).Take(queryParameters.Limit);
 
             return (await filteredTransactions.Include(x => x.Category).ToListAsync(), totalCount);
+        }
+
+        public async Task<MonthlySummary> GetMonthlySummaryAsync(DateOnly date, string userId)
+        {
+            var monthStart = new DateOnly(date.Year, date.Month, 1);
+            var monthEnd = monthStart.AddMonths(1);
+
+            var transactions = await _context.Transactions
+                .Include(x => x.Category)
+                .Where(x => x.UserId == userId && x.Date >= monthStart && x.Date < monthEnd)
+                .ToListAsync();
+
+            var income = transactions
+                .Where(x => x.Category.Type == TransactionType.Income)
+                .Sum(x => x.Amount);
+
+            var expense = transactions
+                .Where(x => x.Category.Type == TransactionType.Expense)
+                .Sum(x => x.Amount);
+
+            var saving = transactions
+                .Where(x => x.Category.Type == TransactionType.Saving)
+                .Sum(x => x.Amount);
+
+            return new MonthlySummary
+            {
+                Year = date.Year,
+                Month = date.Month,
+                Income = income,
+                Expense = expense,
+                Saving = saving,
+                Balance = income - (expense + saving)
+            };
+        }
+
+        public async Task<List<MonthlyCategoryExpenseSummary>> GetMonthlyExpensesByCategoryAsync(DateOnly date, string userId)
+        {
+            var monthStart = new DateOnly(date.Year, date.Month, 1);
+            var monthEnd = monthStart.AddMonths(1);
+
+            return await _context.Transactions
+                .Include(x => x.Category)
+                .Where(x => x.UserId == userId && x.Date >= monthStart && x.Date < monthEnd)
+                .Where(x => x.Category.Type == TransactionType.Expense)
+                .GroupBy(x => x.Category.Name)
+                .Select(g => new MonthlyCategoryExpenseSummary
+                {
+                    CategoryName = g.Key,
+                    Amount = g.Sum(x => x.Amount)
+                })
+                .OrderBy(x => x.CategoryName)
+                .ToListAsync();
         }
 
         public Task UpdateAsync(Transaction entity)

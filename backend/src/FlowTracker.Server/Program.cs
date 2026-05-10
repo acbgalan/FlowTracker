@@ -15,6 +15,7 @@ using FlowTracker.Server.Services.User;
 using FlowTracker.Server.Services.Common;
 using FlowTracker.Server.Services.Transaction;
 using FlowTracker.Server.Services.SavingGoal;
+using FlowTracker.Server.Services.Dashboard;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddScoped<ISavingGoalRepository, SavingGoalRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ISavingGoalService, SavingGoalService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
