@@ -36,13 +36,15 @@
 				<td>{{ goal.name }}</td>
 				<td>{{ goal.targetAmount | currency: 'EUR':'symbol':'1.2-2' }}</td>
 				<td class="align-middle">
-					<div class="progress" role="progressbar" data-bs-toggle="tooltip" data-bs-placement="top"
-						[attr.data-bs-title]="goal.currentAmount | currency: 'EUR':'symbol':'1.2-2'"
+					<div class="progress" role="progressbar"
 						[attr.aria-valuenow]="goal.progressPercentaje"
-						aria-valuemin="0" aria-valuemax="100" tabindex="0">
-						<div class="progress-bar"
+						aria-valuemin="0" aria-valuemax="100">
+						<div class="progress-bar" data-bs-toggle="tooltip" data-bs-placement="top"
+							[attr.data-bs-title]="'Ahorrado: ' + (goal.currentAmount | currency: 'EUR':'symbol':'1.2-2')"
+							[attr.title]="'Ahorrado: ' + (goal.currentAmount | currency: 'EUR':'symbol':'1.2-2')"
 							[style.width.%]="goal.progressPercentaje"
-							[style.backgroundColor]="getProgressColor(goal.progressPercentaje)">
+							[style.backgroundColor]="getProgressColor(goal.progressPercentaje)"
+							tabindex="0">
 							{{ goal.progressPercentaje }}%
 						</div>
 					</div>

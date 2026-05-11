@@ -27,6 +27,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   incomes: number | null = null;
   expenses: number | null = null;
   savings: number | null = null;
+  balanceHasData = true;
+  expensesHasData = true;
   authRequired = false;
 
   get selectedLabel(): string {
@@ -81,9 +83,17 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         this.incomes = summary.incomes;
         this.expenses = summary.expenses;
         this.savings = summary.savings;
+        const values = [summary.incomes, summary.expenses, summary.savings, summary.balance];
+        const hasData = values.some((value) => value !== 0);
+        if (!hasData) {
+          this.balanceHasData = false;
+          this.destroyBalanceChart();
+          this.cdr.detectChanges();
+          return;
+        }
+        this.balanceHasData = true;
         this.cdr.detectChanges();
         const labels = ['Ingresos', 'Gastos', 'Ahorros', 'Saldo'];
-        const values = [summary.incomes, summary.expenses, summary.savings, summary.balance];
         this.renderBalanceChart(labels, values);
       },
       error: (err) => {
@@ -95,9 +105,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         this.expenses = 0;
         this.savings = 0;
         this.availableBalance = 0;
+        this.balanceHasData = false;
+        this.destroyBalanceChart();
         this.cdr.detectChanges();
-        // render zeros so the legend still shows the categories
-        this.renderBalanceChart(['Ingresos', 'Gastos', 'Ahorros', 'Saldo'], [0, 0, 0, 0]);
       },
     });
 
@@ -105,20 +115,26 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       next: (items) => {
         console.debug('monthlyExpensesByCategory', items);
         const mapped = this.normalizeExpenses(items);
+        if (!mapped.length) {
+          this.expensesHasData = false;
+          this.destroyExpensesChart();
+          this.cdr.detectChanges();
+          return;
+        }
+        this.expensesHasData = true;
+        this.cdr.detectChanges();
         const labels = mapped.map((i) => i.label);
         const values = mapped.map((i) => i.amount);
-        if (!labels.length) {
-          this.renderExpensesChart(['Sin datos'], [1]);
-        } else {
-          this.renderExpensesChart(labels, values);
-        }
+        this.renderExpensesChart(labels, values);
       },
       error: (err) => {
         console.error('monthlyExpensesByCategory error', err);
         if (err?.status === 401) {
           this.authRequired = true;
         }
-        this.renderExpensesChart(['Sin datos'], [1]);
+        this.expensesHasData = false;
+        this.destroyExpensesChart();
+        this.cdr.detectChanges();
       },
     });
   }
@@ -230,15 +246,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     if (!canvasEl) return;
     const ctx = canvasEl.getContext('2d');
     if (!ctx) return;
-    const valid = labels.length;
-    const chartLabels = valid ? labels : ['Sin datos'];
-    const chartData = valid ? data : [1];
-    const bg = valid ? labels.map((_, i) => `hsl(${(i * 55) % 360} 70% 50%)`) : ['#6c757d'];
+    const bg = labels.map((_, i) => `hsl(${(i * 55) % 360} 70% 50%)`);
     this.expensesChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: chartLabels,
-        datasets: [{ data: chartData, backgroundColor: bg }],
+        labels,
+        datasets: [{ data, backgroundColor: bg }],
       },
       options: {
         plugins: {
