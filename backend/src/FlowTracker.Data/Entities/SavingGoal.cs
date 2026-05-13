@@ -12,6 +12,7 @@ namespace FlowTracker.Data.Entities
         public required string Name { get; set; }
         public decimal TargetAmount { get; set; }
         public DateOnly? Deadline { get; set; }
+        public bool Completed { get; set; }
 
         public User User { get; set; } = null!;
         public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>(); // Updated for new relationship

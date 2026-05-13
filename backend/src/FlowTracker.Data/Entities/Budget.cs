@@ -13,6 +13,7 @@ namespace FlowTracker.Data.Entities
         public decimal LimitAmount { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
+        public bool Completed { get; set; }
 
         public Category Category { get; set; } = null!;
         public User User { get; set; } = null!;

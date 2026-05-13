@@ -3,4 +3,5 @@ export interface UpdateSavingGoalRequest {
     name: string;
     targetAmount: number;
     deadline: string | null;
+    completed: boolean;
 }

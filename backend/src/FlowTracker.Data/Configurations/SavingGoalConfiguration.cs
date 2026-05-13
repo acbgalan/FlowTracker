@@ -31,6 +31,9 @@ namespace FlowTracker.Data.Configurations
             builder.Property(s => s.Deadline)
                 .IsRequired(false)
                 .HasColumnType("date");
+
+            builder.Property(s => s.Completed)
+                .IsRequired();
         }
     }
 }

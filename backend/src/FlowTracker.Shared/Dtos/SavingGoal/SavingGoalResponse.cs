@@ -13,5 +13,6 @@ namespace FlowTracker.Shared.Dtos.SavingGoal
         public decimal CurrentAmount { get; set; }
         public DateOnly? Deadline { get; set; }
         public decimal ProgressPercentaje { get; set; }
+        public bool Completed { get; set; }
     }
 }

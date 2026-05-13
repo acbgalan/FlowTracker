@@ -27,6 +27,7 @@
 				<th scope="col">Meta</th>
 				<th scope="col">Ahorrado</th>
 				<th scope="col">Fecha</th>
+				<th scope="col">Completada</th>
 				<th scope="col"></th>
 			</tr>
 		</thead>
@@ -52,6 +53,13 @@
 				<td>
 					@if (goal.deadline) {
 					{{ goal.deadline | date: 'yyyy-MM-dd' }}
+					}
+				</td>
+				<td>
+					@if (goal.completed) {
+					<span class="badge text-bg-success">Si</span>
+					} @else {
+					<span class="badge text-bg-secondary">No</span>
 					}
 				</td>
 				<td class="text-end">

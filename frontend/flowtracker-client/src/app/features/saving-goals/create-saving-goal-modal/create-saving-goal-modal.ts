@@ -52,6 +52,7 @@ export class CreateSavingGoalModal implements OnDestroy {
       name: rawValue.name.trim(),
       targetAmount: Number(rawValue.targetAmount),
       deadline: rawValue.deadline ? rawValue.deadline : null,
+      completed: false,
     };
 
     this.isSubmitting = true;

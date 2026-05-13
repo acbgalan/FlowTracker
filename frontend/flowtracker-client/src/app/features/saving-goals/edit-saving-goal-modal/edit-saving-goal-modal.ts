@@ -40,6 +40,7 @@ export class EditSavingGoalModal implements OnChanges, OnDestroy {
     name: ['', [Validators.required, Validators.maxLength(100)]],
     targetAmount: [0, [Validators.required, Validators.min(0.01)]],
     deadline: [''],
+    completed: [false],
   });
 
   public ngOnChanges(changes: SimpleChanges): void {
@@ -66,6 +67,7 @@ export class EditSavingGoalModal implements OnChanges, OnDestroy {
       name: rawValue.name.trim(),
       targetAmount: Number(rawValue.targetAmount),
       deadline: rawValue.deadline ? rawValue.deadline : null,
+      completed: rawValue.completed,
     };
 
     this.isSubmitting = true;
@@ -93,6 +95,7 @@ export class EditSavingGoalModal implements OnChanges, OnDestroy {
         name: '',
         targetAmount: 0,
         deadline: '',
+        completed: false,
       });
       this.errorMessage = '';
       this.isSubmitting = false;
@@ -103,6 +106,7 @@ export class EditSavingGoalModal implements OnChanges, OnDestroy {
       name: selectedGoal.name,
       targetAmount: selectedGoal.targetAmount,
       deadline: this.toDateInputValue(selectedGoal.deadline),
+      completed: selectedGoal.completed,
     });
     this.errorMessage = '';
     this.isSubmitting = false;

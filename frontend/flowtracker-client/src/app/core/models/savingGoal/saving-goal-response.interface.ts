@@ -5,4 +5,5 @@ export interface SavingGoalResponse {
     currentAmount: number;
     deadline: Date | null;
     progressPercentaje: number;
+    completed: boolean;
 }
